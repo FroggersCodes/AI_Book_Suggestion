@@ -1,0 +1,447 @@
+/* ===================================
+   CSS Variables
+   =================================== */
+:root {
+  --bg: #F5F1EB;
+  --text: #1A1A1A;
+  --text-muted: #6B6B6B;
+  --btn-bg: #1A1A1A;
+  --btn-text: #F5F1EB;
+  --btn-hover: #333333;
+  --card-bg: #FFFFFF;
+  --card-border: #E0D9CF;
+  --card-hover-shadow: rgba(0, 0, 0, 0.08);
+  --progress-bg: #D4CFC4;
+  --progress-active: #1A1A1A;
+  --max-width: 820px;
+  --radius: 8px;
+  --transition: 300ms ease;
+}
+
+/* ===================================
+   Reset & Base
+   =================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===================================
+   Progress Header
+   =================================== */
+#progress-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--bg);
+  padding: 20px 24px 12px;
+}
+
+#progress-header.hidden {
+  display: none;
+}
+
+.progress-bar {
+  display: flex;
+  gap: 8px;
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.progress-segment {
+  flex: 1;
+  height: 4px;
+  background: var(--progress-bg);
+  border-radius: 2px;
+  transition: background var(--transition);
+}
+
+.progress-segment.completed,
+.progress-segment.active {
+  background: var(--progress-active);
+}
+
+.progress-labels {
+  display: flex;
+  max-width: var(--max-width);
+  margin: 8px auto 0;
+}
+
+.progress-labels span {
+  flex: 1;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+
+.progress-labels span.active {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.progress-labels span.completed {
+  color: var(--text);
+}
+
+/* ===================================
+   Steps
+   =================================== */
+.step {
+  display: none;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.step.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeSlideIn 400ms ease forwards;
+}
+
+.step-content {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+/* Add top padding when progress bar is visible */
+#step-genre .step-content,
+#step-theme .step-content,
+#step-mood .step-content,
+#step-length .step-content {
+  padding-top: 60px;
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 32px;
+}
+
+/* ===================================
+   Welcome Screen
+   =================================== */
+.welcome-content {
+  text-align: center;
+}
+
+.tagline {
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  max-width: 480px;
+  margin: 0 auto 40px;
+  line-height: 1.6;
+}
+
+/* ===================================
+   Buttons
+   =================================== */
+.btn-primary {
+  display: inline-block;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: none;
+  padding: 16px 48px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition), transform 150ms ease;
+  text-decoration: none;
+  text-align: center;
+}
+
+.btn-primary:hover {
+  background: var(--btn-hover);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  display: inline-block;
+  background: transparent;
+  color: var(--text);
+  border: 2px solid var(--text);
+  padding: 14px 36px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  background: var(--text);
+  color: var(--btn-text);
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 16px;
+  transition: color 150ms ease;
+}
+
+.btn-back:hover {
+  color: var(--text);
+}
+
+/* ===================================
+   Option Cards Grid
+   =================================== */
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.options-grid-length {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 560px;
+}
+
+.option-card {
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 24px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: cardIn 300ms ease forwards;
+}
+
+.option-card:hover {
+  border-color: var(--btn-bg);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px var(--card-hover-shadow);
+}
+
+.option-card:active {
+  transform: translateY(0);
+}
+
+.option-label {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.option-subtitle {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* ===================================
+   Result Screen
+   =================================== */
+.result-card {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  animation: fadeSlideIn 500ms ease forwards;
+}
+
+.result-cover {
+  flex-shrink: 0;
+}
+
+.result-cover img {
+  width: 220px;
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.result-details {
+  flex: 1;
+}
+
+.result-details h2 {
+  font-size: 1.75rem;
+  margin-bottom: 8px;
+}
+
+.result-author {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.result-description {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text);
+  margin-bottom: 32px;
+}
+
+.btn-amazon {
+  display: inline-block;
+}
+
+.result-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 48px;
+  justify-content: center;
+}
+
+/* ===================================
+   Loading Overlay
+   =================================== */
+#loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+#loading-overlay.hidden {
+  display: none;
+}
+
+#loading-overlay p {
+  margin-top: 24px;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--card-border);
+  border-top-color: var(--text);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ===================================
+   Animations
+   =================================== */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===================================
+   Responsive
+   =================================== */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    margin-bottom: 24px;
+  }
+
+  .result-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .result-cover img {
+    width: 180px;
+  }
+
+  .result-details {
+    text-align: center;
+  }
+
+  .options-grid-length {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .step {
+    padding: 16px;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  .options-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .option-card {
+    padding: 18px 12px;
+  }
+
+  .result-cover img {
+    width: 150px;
+  }
+
+  .btn-primary {
+    padding: 14px 36px;
+    width: 100%;
+  }
+
+  .result-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .result-actions .btn-secondary {
+    text-align: center;
+  }
+}

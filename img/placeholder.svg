@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="330" viewBox="0 0 220 330">
+  <rect width="220" height="330" rx="8" fill="#E0D9CF"/>
+  <g transform="translate(70, 100)">
+    <rect x="10" y="0" width="60" height="80" rx="4" fill="#C4BDB3" stroke="#B0A89E" stroke-width="2"/>
+    <rect x="15" y="8" width="50" height="4" rx="2" fill="#B0A89E"/>
+    <rect x="15" y="16" width="40" height="4" rx="2" fill="#B0A89E"/>
+    <rect x="15" y="28" width="50" height="3" rx="1.5" fill="#C4BDB3" stroke="#B0A89E" stroke-width="0.5"/>
+    <rect x="15" y="34" width="50" height="3" rx="1.5" fill="#C4BDB3" stroke="#B0A89E" stroke-width="0.5"/>
+    <rect x="15" y="40" width="50" height="3" rx="1.5" fill="#C4BDB3" stroke="#B0A89E" stroke-width="0.5"/>
+    <rect x="15" y="46" width="35" height="3" rx="1.5" fill="#C4BDB3" stroke="#B0A89E" stroke-width="0.5"/>
+  </g>
+  <text x="110" y="220" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="14" fill="#8A8379">No Cover Available</text>
+</svg>

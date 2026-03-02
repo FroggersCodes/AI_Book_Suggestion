@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Your Next Read</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Progress bar (visible during steps 1-4) -->
+  <header id="progress-header" class="hidden">
+    <div class="progress-bar">
+      <div class="progress-segment" data-step="1"></div>
+      <div class="progress-segment" data-step="2"></div>
+      <div class="progress-segment" data-step="3"></div>
+      <div class="progress-segment" data-step="4"></div>
+    </div>
+    <div class="progress-labels">
+      <span data-step="1">Genre</span>
+      <span data-step="2">Theme</span>
+      <span data-step="3">Mood</span>
+      <span data-step="4">Length</span>
+    </div>
+  </header>
+
+  <main id="app">
+
+    <!-- Welcome screen -->
+    <section id="step-welcome" class="step active">
+      <div class="step-content welcome-content">
+        <h1>Find Your Next Read</h1>
+        <p class="tagline">Answer four quick questions and we'll suggest the perfect book for you.</p>
+        <button class="btn-primary" id="btn-start">Get Started</button>
+      </div>
+    </section>
+
+    <!-- Step 1: Genre -->
+    <section id="step-genre" class="step">
+      <div class="step-content">
+        <button class="btn-back" id="back-genre" aria-label="Go back">&larr; Back</button>
+        <h2>What genre are you in the mood for?</h2>
+        <div class="options-grid" id="genre-options"></div>
+      </div>
+    </section>
+
+    <!-- Step 2: Theme -->
+    <section id="step-theme" class="step">
+      <div class="step-content">
+        <button class="btn-back" id="back-theme" aria-label="Go back">&larr; Back</button>
+        <h2>What theme interests you?</h2>
+        <div class="options-grid" id="theme-options"></div>
+      </div>
+    </section>
+
+    <!-- Step 3: Mood -->
+    <section id="step-mood" class="step">
+      <div class="step-content">
+        <button class="btn-back" id="back-mood" aria-label="Go back">&larr; Back</button>
+        <h2>What mood are you looking for?</h2>
+        <div class="options-grid" id="mood-options"></div>
+      </div>
+    </section>
+
+    <!-- Step 4: Length -->
+    <section id="step-length" class="step">
+      <div class="step-content">
+        <button class="btn-back" id="back-length" aria-label="Go back">&larr; Back</button>
+        <h2>How long of a read do you want?</h2>
+        <div class="options-grid options-grid-length" id="length-options"></div>
+      </div>
+    </section>
+
+    <!-- Result screen -->
+    <section id="step-result" class="step">
+      <div class="step-content">
+        <div class="result-card">
+          <div class="result-cover">
+            <img id="result-cover-img" src="" alt="Book cover">
+          </div>
+          <div class="result-details">
+            <h2 id="result-title"></h2>
+            <p class="result-author" id="result-author"></p>
+            <p class="result-description" id="result-description"></p>
+            <a id="result-amazon-link" class="btn-primary btn-amazon" href="#" target="_blank" rel="noopener noreferrer">
+              Buy on Amazon
+            </a>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn-secondary" id="btn-try-again">Try Another</button>
+          <button class="btn-secondary" id="btn-start-over">Start Over</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- No match screen -->
+    <section id="step-no-match" class="step">
+      <div class="step-content welcome-content">
+        <h2>No match found</h2>
+        <p class="tagline">We couldn't find a book matching all your criteria. Try a different combination!</p>
+        <button class="btn-primary" id="btn-no-match-restart">Start Over</button>
+      </div>
+    </section>
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="hidden">
+      <div class="spinner"></div>
+      <p>Finding your perfect book...</p>
+    </div>
+
+  </main>
+
+  <script src="js/books.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
