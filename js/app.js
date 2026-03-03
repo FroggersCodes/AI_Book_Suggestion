@@ -169,19 +169,29 @@ function selectOption(category, value) {
 // ===================================
 // Google Books API — Query Builder
 // ===================================
-const GENRE_QUERY_MAP = {
+// subject: term used for Google Books category filtering
+const GENRE_SUBJECT_MAP = {
   "fiction": "fiction",
   "sci-fi": "science fiction",
   "fantasy": "fantasy",
-  "mystery": "mystery detective",
+  "mystery": "mystery",
   "romance": "romance",
   "non-fiction": "nonfiction",
   "horror": "horror",
   "historical-fiction": "historical fiction",
-  "thriller": "thriller suspense",
-  "biography": "biography memoir",
-  "self-help": "self help personal development",
-  "humor": "humor comedy"
+  "thriller": "thriller",
+  "biography": "biography",
+  "self-help": "self-help",
+  "humor": "humor"
+};
+
+// Extra keywords added alongside subject to improve relevance
+const GENRE_KEYWORDS_MAP = {
+  "mystery": "detective crime",
+  "thriller": "suspense",
+  "biography": "memoir",
+  "self-help": "personal development",
+  "humor": "comedy"
 };
 
 const THEME_QUERY_MAP = {
@@ -211,9 +221,15 @@ const MOOD_QUERY_MAP = {
 function buildSearchQuery(level) {
   const parts = [];
 
-  // Genre as keywords (always included)
-  const genreTerms = GENRE_QUERY_MAP[state.genre] || state.genre;
-  parts.push(genreTerms);
+  // Genre as subject: with quoted multi-word terms (e.g. subject:"science fiction")
+  const subject = GENRE_SUBJECT_MAP[state.genre] || state.genre;
+  parts.push(subject.includes(" ") ? `subject:"${subject}"` : `subject:${subject}`);
+
+  // Add genre-specific keywords for better relevance
+  const genreKeywords = GENRE_KEYWORDS_MAP[state.genre];
+  if (genreKeywords) {
+    parts.push(genreKeywords);
+  }
 
   // Level 0: genre + theme + mood (most specific)
   // Level 1: genre + theme (drop mood)
