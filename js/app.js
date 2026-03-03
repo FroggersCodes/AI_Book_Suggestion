@@ -401,50 +401,6 @@ function sortByPopularity(books) {
 }
 
 // ===================================
-// Curated Book Matching
-// ===================================
-function getCuratedMatches() {
-  // Tier 1: Exact match on genre + theme + mood + length
-  let matches = BOOKS.filter((b) =>
-    b.genre === state.genre && b.theme === state.theme &&
-    b.mood === state.mood && b.length === state.length
-  );
-
-  // Tier 2: Relax length
-  if (matches.length === 0) {
-    matches = BOOKS.filter((b) =>
-      b.genre === state.genre && b.theme === state.theme && b.mood === state.mood
-    );
-  }
-
-  // Tier 3: Relax mood + length
-  if (matches.length === 0) {
-    matches = BOOKS.filter((b) =>
-      b.genre === state.genre && b.theme === state.theme
-    );
-  }
-
-  // Normalize to same shape as API results
-  return matches.map((book) => ({
-    id: `curated-${book.isbn13}`,
-    title: book.title,
-    subtitle: "",
-    author: book.author,
-    isbn10: book.isbn10,
-    isbn13: book.isbn13,
-    description: book.description,
-    pageCount: 0,
-    categories: [book.genre],
-    maturityRating: "NOT_MATURE",
-    thumbnail: "",
-    isSeries: false,
-    seriesInfo: null,
-    ratingsCount: Infinity,
-    averageRating: 5
-  }));
-}
-
-// ===================================
 // Maturity Assessment
 // ===================================
 const MATURE_KEYWORDS = [
@@ -518,11 +474,7 @@ async function findAndShowBook() {
 
     // Try fetching more results: paginate first, then broaden query
     while (newResults.length === 0 && state.searchLevel <= 3) {
-      // 1. Get curated matches (only on first pass at level 0)
-      const curatedMatches = (state.searchLevel === 0 && state.startIndex === 0)
-        ? getCuratedMatches() : [];
-
-      // 2. Get API results with pagination
+      // 1. Get API results with pagination
       const rawResults = await searchGoogleBooks(state.searchLevel, state.startIndex);
       let filteredResults = filterResults(rawResults);
 
@@ -543,19 +495,9 @@ async function findAndShowBook() {
         filteredResults = rawResults;
       }
 
-      const sortedApiResults = sortByPopularity(filteredResults);
-
-      // 3. Deduplicate against curated books
-      const curatedKeys = new Set(
-        curatedMatches.map((b) => `${b.title.toLowerCase()}|${b.author.toLowerCase()}`)
-      );
-      const uniqueApiResults = sortedApiResults.filter(
-        (b) => !curatedKeys.has(`${b.title.toLowerCase()}|${b.author.toLowerCase()}`)
-      );
-
-      // 4. Merge and remove already-seen books
-      const merged = [...curatedMatches, ...uniqueApiResults];
-      newResults = merged.filter((b) => !seenKeys.has(`${b.title.toLowerCase()}|${b.author.toLowerCase()}`));
+      // 2. Sort by popularity and remove already-seen books
+      newResults = sortByPopularity(filteredResults)
+        .filter((b) => !seenKeys.has(`${b.title.toLowerCase()}|${b.author.toLowerCase()}`));
 
       // If nothing new, try next page first, then broaden query
       if (newResults.length === 0) {
