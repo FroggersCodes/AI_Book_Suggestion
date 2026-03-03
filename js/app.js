@@ -275,7 +275,9 @@ function parseGoogleBookResult(item) {
     maturityRating: info.maturityRating || "NOT_MATURE",
     thumbnail: info.imageLinks?.thumbnail?.replace("http:", "https:") || "",
     isSeries,
-    seriesInfo: item.volumeInfo?.seriesInfo || null
+    seriesInfo: item.volumeInfo?.seriesInfo || null,
+    ratingsCount: info.ratingsCount || 0,
+    averageRating: info.averageRating || 0
   };
 }
 
@@ -330,6 +332,62 @@ function filterResults(books) {
 }
 
 // ===================================
+// Popularity Sorting
+// ===================================
+function sortByPopularity(books) {
+  return books.slice().sort((a, b) => {
+    // Primary: ratingsCount descending. Secondary: averageRating descending.
+    const scoreA = (a.ratingsCount || 0) * 1000 + (a.averageRating || 0);
+    const scoreB = (b.ratingsCount || 0) * 1000 + (b.averageRating || 0);
+    return scoreB - scoreA;
+  });
+}
+
+// ===================================
+// Curated Book Matching
+// ===================================
+function getCuratedMatches() {
+  // Tier 1: Exact match on genre + theme + mood + length
+  let matches = BOOKS.filter((b) =>
+    b.genre === state.genre && b.theme === state.theme &&
+    b.mood === state.mood && b.length === state.length
+  );
+
+  // Tier 2: Relax length
+  if (matches.length === 0) {
+    matches = BOOKS.filter((b) =>
+      b.genre === state.genre && b.theme === state.theme && b.mood === state.mood
+    );
+  }
+
+  // Tier 3: Relax mood + length
+  if (matches.length === 0) {
+    matches = BOOKS.filter((b) =>
+      b.genre === state.genre && b.theme === state.theme
+    );
+  }
+
+  // Normalize to same shape as API results
+  return matches.map((book) => ({
+    id: `curated-${book.isbn13}`,
+    title: book.title,
+    subtitle: "",
+    author: book.author,
+    isbn10: book.isbn10,
+    isbn13: book.isbn13,
+    description: book.description,
+    pageCount: 0,
+    categories: [book.genre],
+    maturityRating: "NOT_MATURE",
+    thumbnail: "",
+    isSeries: false,
+    seriesInfo: null,
+    ratingsCount: Infinity,
+    averageRating: 5
+  }));
+}
+
+// ===================================
 // Maturity Assessment
 // ===================================
 const MATURE_KEYWORDS = [
@@ -375,13 +433,29 @@ async function findAndShowBook() {
 
   // If no cached results or we've exhausted them, fetch new ones
   if (state.cachedResults.length === 0 || state.resultIndex >= state.cachedResults.length) {
+    // 1. Get curated matches (instant, no API call)
+    const curatedMatches = getCuratedMatches();
+
+    // 2. Get API results, filter, and sort by popularity
     const rawResults = await searchGoogleBooks();
-    state.cachedResults = filterResults(rawResults);
+    const filteredResults = filterResults(rawResults);
+    const sortedApiResults = sortByPopularity(filteredResults);
+
+    // 3. Deduplicate: remove API results that match curated books
+    const curatedKeys = new Set(
+      curatedMatches.map((b) => `${b.title.toLowerCase()}|${b.author.toLowerCase()}`)
+    );
+    const uniqueApiResults = sortedApiResults.filter(
+      (b) => !curatedKeys.has(`${b.title.toLowerCase()}|${b.author.toLowerCase()}`)
+    );
+
+    // 4. Merge: curated first, then popularity-sorted API results
+    state.cachedResults = [...curatedMatches, ...uniqueApiResults];
     state.resultIndex = 0;
 
-    // If still no results after filtering, try without length filter
+    // 5. Fallback: if no results, try API without length filter
     if (state.cachedResults.length === 0 && rawResults.length > 0) {
-      state.cachedResults = rawResults;
+      let fallbackResults = rawResults;
 
       // Still try format filter if applicable
       if (state.type === "fiction" && state.format) {
@@ -391,9 +465,11 @@ async function findAndShowBook() {
           return true;
         });
         if (formatFiltered.length > 0) {
-          state.cachedResults = formatFiltered;
+          fallbackResults = formatFiltered;
         }
       }
+
+      state.cachedResults = sortByPopularity(fallbackResults);
     }
   }
 
