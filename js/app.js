@@ -537,8 +537,6 @@ async function findAndShowBook() {
   const coverImg = $("#result-cover-img");
   if (book.thumbnail) {
     coverImg.src = book.thumbnail;
-  } else if (book.isbn13) {
-    coverImg.src = `https://covers.openlibrary.org/b/isbn/${book.isbn13}-L.jpg`;
   } else {
     coverImg.src = "img/placeholder.svg";
   }
