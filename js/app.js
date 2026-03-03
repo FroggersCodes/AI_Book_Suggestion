@@ -260,6 +260,7 @@ async function searchGoogleBooks(level, startIndex = 0) {
   const query = buildSearchQuery(level);
   const url = `${CONFIG.GOOGLE_BOOKS_API_URL}?q=${encodeURIComponent(query)}&maxResults=${CONFIG.MAX_RESULTS}&startIndex=${startIndex}&langRestrict=en&orderBy=relevance&printType=books&key=${CONFIG.GOOGLE_BOOKS_API_KEY}`;
 
+  console.log("[BookBrew] Fetching:", url);
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -267,9 +268,13 @@ async function searchGoogleBooks(level, startIndex = 0) {
     const response = await fetch(url, { signal: controller.signal });
     clearTimeout(timeoutId);
 
-    if (!response.ok) return [];
+    if (!response.ok) {
+      console.warn(`[BookBrew] API error: HTTP ${response.status}`);
+      return [];
+    }
 
     const data = await response.json();
+    console.log(`[BookBrew] API status: ${response.status}, items: ${data.items?.length ?? 0}`);
     if (!data.items || data.items.length === 0) return [];
 
     return data.items
@@ -360,7 +365,7 @@ const ACADEMIC_PATTERNS = [
 function filterResults(books) {
   return books.filter((book) => {
     // Exclude academic/thesis works that slip through subject filters
-    const textToCheck = `${book.title} ${book.description}`;
+    const textToCheck = book.title;
     if (ACADEMIC_PATTERNS.some((re) => re.test(textToCheck))) return false;
 
     // If Google Books returned category data, use it to reject obvious type mismatches.
