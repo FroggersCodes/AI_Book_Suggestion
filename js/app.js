@@ -12,7 +12,7 @@ const state = {
   cachedResults: [],  // Google Books results for current search
   resultIndex: 0,     // Which result we're showing
   seenBookIds: [],    // Track shown books to avoid repeats
-  searchLevel: 0,     // 0 = full query, 1 = genre+theme, 2 = genre only
+  searchLevel: 0,     // 0 = genre+theme+mood, 1 = genre+theme, 2 = genre+theme hint, 3 = genre only
   startIndex: 0       // Pagination offset for Google Books API
 };
 
@@ -233,10 +233,16 @@ function buildSearchQuery(level) {
 
   // Level 0: genre + theme + mood (most specific)
   // Level 1: genre + theme (drop mood)
-  // Level 2: genre only (broadest)
+  // Level 2: genre + primary theme keyword only (drop secondary theme words)
+  // Level 3: genre only (broadest — last resort)
   if (level <= 1) {
     const themeTerms = THEME_QUERY_MAP[state.theme] || state.theme;
     parts.push(themeTerms);
+  }
+
+  if (level === 2) {
+    const themeTerms = THEME_QUERY_MAP[state.theme] || state.theme;
+    parts.push(themeTerms.split(" ")[0]); // only the first/strongest theme keyword
   }
 
   if (level === 0) {
@@ -339,8 +345,32 @@ function detectSeries(volumeInfo) {
 // ===================================
 // Filter Results
 // ===================================
+
+// Patterns in title/description that signal an academic work, not a trade book
+const ACADEMIC_PATTERNS = [
+  /\bdissertation\b/i,
+  /\bthesis\b/i,
+  /\bproceedings\b/i,
+  /\bpeer.reviewed\b/i,
+  /\bacademic journal\b/i,
+  /\blecture notes\b/i,
+  /\bconference paper\b/i,
+];
+
 function filterResults(books) {
   return books.filter((book) => {
+    // Exclude academic/thesis works that slip through subject filters
+    const textToCheck = `${book.title} ${book.description}`;
+    if (ACADEMIC_PATTERNS.some((re) => re.test(textToCheck))) return false;
+
+    // If Google Books returned category data, use it to reject obvious type mismatches.
+    // E.g. a user who selected Fiction should not see Juvenile Nonfiction books.
+    const cats = (book.categories || []).join(" ").toLowerCase();
+    if (cats) {
+      if (state.type === "fiction" && /\bnonfiction\b/.test(cats)) return false;
+      if (state.type === "non-fiction" && /\bfiction\b/.test(cats) && !/nonfiction/.test(cats)) return false;
+    }
+
     // Filter by length (page count) — skip if page count is unknown
     if (book.pageCount > 0) {
       if (state.length === "short" && book.pageCount > 250) return false;
@@ -466,7 +496,7 @@ async function findAndShowBook() {
     let newResults = [];
 
     // Try fetching more results: paginate first, then broaden query
-    while (newResults.length === 0 && state.searchLevel <= 2) {
+    while (newResults.length === 0 && state.searchLevel <= 3) {
       // 1. Get curated matches (only on first pass at level 0)
       const curatedMatches = (state.searchLevel === 0 && state.startIndex === 0)
         ? getCuratedMatches() : [];
@@ -475,19 +505,21 @@ async function findAndShowBook() {
       const rawResults = await searchGoogleBooks(state.searchLevel, state.startIndex);
       let filteredResults = filterResults(rawResults);
 
-      // Fallback: if filters are too strict, relax them
+      // Gradually relax filters rather than dropping all at once.
+      // Step 2: relax length constraint, keep format filter.
+      if (filteredResults.length === 0 && rawResults.length > 0) {
+        filteredResults = rawResults.filter((book) => {
+          if (state.type === "fiction" && state.format) {
+            if (state.format === "series" && !book.isSeries) return false;
+            if (state.format === "standalone" && book.isSeries) return false;
+          }
+          return true;
+        });
+      }
+
+      // Step 3: relax length + format — use all raw results for this search level.
       if (filteredResults.length === 0 && rawResults.length > 0) {
         filteredResults = rawResults;
-        if (state.type === "fiction" && state.format) {
-          const formatFiltered = rawResults.filter((book) => {
-            if (state.format === "series") return book.isSeries;
-            if (state.format === "standalone") return !book.isSeries;
-            return true;
-          });
-          if (formatFiltered.length > 0) {
-            filteredResults = formatFiltered;
-          }
-        }
       }
 
       const sortedApiResults = sortByPopularity(filteredResults);
