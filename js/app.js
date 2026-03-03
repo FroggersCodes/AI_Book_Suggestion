@@ -483,6 +483,14 @@ function assessMaturity(book) {
 }
 
 // ===================================
+// Star Rating
+// ===================================
+function renderStars(rating) {
+  const rounded = Math.min(5, Math.max(1, Math.round(rating)));
+  return "★".repeat(rounded) + "☆".repeat(5 - rounded);
+}
+
+// ===================================
 // Display Result
 // ===================================
 async function findAndShowBook() {
@@ -583,6 +591,18 @@ async function findAndShowBook() {
     : book.title;
   $("#result-title").textContent = displayTitle;
   $("#result-author").textContent = `by ${book.author}`;
+
+  // Star rating — links to Amazon reviews
+  const ratingEl = $("#result-rating");
+  if (book.averageRating) {
+    const stars = renderStars(book.averageRating);
+    const reviewsUrl = book.isbn10
+      ? `https://www.amazon.com/dp/${book.isbn10}#customerReviews`
+      : `https://www.amazon.com/s?k=${encodeURIComponent(book.title + " " + book.author)}`;
+    ratingEl.innerHTML = `<a href="${reviewsUrl}" class="reviews-link" target="_blank" rel="noopener noreferrer">Reviews</a>: <span class="result-stars">${stars}</span>`;
+  } else {
+    ratingEl.innerHTML = "";
+  }
 
   // Truncate long descriptions
   const desc = book.description || "No description available.";
