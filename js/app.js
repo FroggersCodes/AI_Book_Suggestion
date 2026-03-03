@@ -448,14 +448,13 @@ function assessMaturity(book) {
 // ===================================
 function renderStars(rating) {
   const clamped = Math.min(5, Math.max(0, rating));
-  const full    = Math.floor(clamped);
-  const decimal = clamped - full;
-  // 0.25–0.74 → half star; ≥0.75 → round up to full
-  const hasHalf  = decimal >= 0.25 && decimal < 0.75;
-  const totalFull = full + (decimal >= 0.75 ? 1 : 0);
-  const emptyCount = 5 - totalFull - (hasHalf ? 1 : 0);
+  // Round to nearest 0.5 (standard half-star convention)
+  const rounded = Math.round(clamped * 2) / 2;
+  const full = Math.floor(rounded);
+  const hasHalf = rounded - full === 0.5;
+  const emptyCount = 5 - full - (hasHalf ? 1 : 0);
 
-  const fullHtml  = '<span class="star-full">★</span>'.repeat(totalFull);
+  const fullHtml  = '<span class="star-full">★</span>'.repeat(full);
   const halfHtml  = hasHalf
     ? '<span class="star-half"><span class="fill">★</span>☆</span>'
     : '';
@@ -557,7 +556,7 @@ async function findAndShowBook() {
     const reviewsUrl = book.isbn10
       ? `https://www.amazon.com/dp/${book.isbn10}#customerReviews`
       : `https://www.amazon.com/s?k=${encodeURIComponent(book.title + " " + book.author)}`;
-    ratingEl.innerHTML = `<a href="${reviewsUrl}" class="reviews-link" target="_blank" rel="noopener noreferrer">Reviews</a>: <span class="result-stars">${stars}</span>`;
+    ratingEl.innerHTML = `<a href="${reviewsUrl}" class="reviews-link" target="_blank" rel="noopener noreferrer">Reviews</a>: <span class="result-stars">${stars}</span> <span class="rating-value">${book.averageRating.toFixed(1)}</span>`;
   } else {
     ratingEl.innerHTML = "";
   }
