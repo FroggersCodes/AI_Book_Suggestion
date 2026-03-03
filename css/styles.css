@@ -19,6 +19,9 @@
 
   --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --logo-h: 54px;    /* height of #site-logo bar */
+  --progress-h: 56px; /* height of #progress-header */
 }
 
 /* ===================================
@@ -40,16 +43,39 @@ body {
 }
 
 /* ===================================
-   Progress Header
+   Persistent Site Logo
    =================================== */
-#progress-header {
+#site-logo {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
+  z-index: 110;
+  height: var(--logo-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 1.5rem;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  /* subtle separator from content below */
+  border-bottom: 1px solid var(--card-border);
+}
+
+/* ===================================
+   Progress Header
+   =================================== */
+#progress-header {
+  position: fixed;
+  top: var(--logo-h);   /* sits directly below the logo */
+  left: 0;
+  right: 0;
   z-index: 100;
   background: var(--bg);
-  padding: 20px 24px 12px;
+  padding: 14px 24px 10px;
 }
 
 #progress-header.hidden {
@@ -106,7 +132,8 @@ body {
 .step {
   display: none;
   min-height: 100vh;
-  padding: 24px;
+  /* top padding clears the fixed logo bar; sides/bottom stay at 24px */
+  padding: calc(var(--logo-h) + 24px) 24px 24px;
 }
 
 .step.active {
@@ -122,14 +149,14 @@ body {
   margin: 0 auto;
 }
 
-/* Add top padding when progress bar is visible */
+/* Selection steps: also clear the progress bar that sits below the logo */
 #step-type .step-content,
 #step-format .step-content,
 #step-genre .step-content,
 #step-theme .step-content,
 #step-mood .step-content,
 #step-length .step-content {
-  padding-top: 60px;
+  padding-top: var(--progress-h);
 }
 
 h1 {
@@ -156,15 +183,6 @@ h2 {
   text-align: center;
 }
 
-.welcome-brand {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  font-size: clamp(2.5rem, 7vw, 3.75rem);
-  letter-spacing: 0.04em;
-  color: var(--text);
-  display: block;
-  margin-bottom: 56px;
-}
 
 .tagline {
   font-family: var(--font-sans);
@@ -367,7 +385,33 @@ h2 {
 }
 
 .result-stars {
-  letter-spacing: 2px;
+  display: inline-flex;
+  gap: 1px;
+  vertical-align: middle;
+}
+
+/* Full and empty stars are plain inline text */
+.star-full,
+.star-empty {
+  line-height: 1;
+}
+
+/* Half star: ☆ is the base (empty outline); .fill clips ★ to the left 50% */
+.star-half {
+  display: inline-block;
+  position: relative;
+  line-height: 1;
+}
+
+.star-half .fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 50%;
+  overflow: hidden;
+  display: inline-block;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 /* ===================================
@@ -509,11 +553,6 @@ h2 {
     margin-bottom: 24px;
   }
 
-  .welcome-brand {
-    font-size: 2.75rem;
-    margin-bottom: 40px;
-  }
-
   .result-card {
     flex-direction: column;
     align-items: center;
@@ -541,11 +580,6 @@ h2 {
 
   h1 {
     font-size: 1.75rem;
-  }
-
-  .welcome-brand {
-    font-size: 2.25rem;
-    margin-bottom: 32px;
   }
 
   .options-grid {

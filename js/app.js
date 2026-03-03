@@ -486,8 +486,21 @@ function assessMaturity(book) {
 // Star Rating
 // ===================================
 function renderStars(rating) {
-  const rounded = Math.min(5, Math.max(1, Math.round(rating)));
-  return "★".repeat(rounded) + "☆".repeat(5 - rounded);
+  const clamped = Math.min(5, Math.max(0, rating));
+  const full    = Math.floor(clamped);
+  const decimal = clamped - full;
+  // 0.25–0.74 → half star; ≥0.75 → round up to full
+  const hasHalf  = decimal >= 0.25 && decimal < 0.75;
+  const totalFull = full + (decimal >= 0.75 ? 1 : 0);
+  const emptyCount = 5 - totalFull - (hasHalf ? 1 : 0);
+
+  const fullHtml  = '<span class="star-full">★</span>'.repeat(totalFull);
+  const halfHtml  = hasHalf
+    ? '<span class="star-half"><span class="fill">★</span>☆</span>'
+    : '';
+  const emptyHtml = '<span class="star-empty">☆</span>'.repeat(emptyCount);
+
+  return fullHtml + halfHtml + emptyHtml;
 }
 
 // ===================================
