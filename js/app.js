@@ -12,7 +12,8 @@ const state = {
   cachedResults: [],  // Google Books results for current search
   resultIndex: 0,     // Which result we're showing
   seenBookIds: [],    // Track shown books to avoid repeats
-  searchLevel: 0      // 0 = full query, 1 = genre+theme, 2 = genre only
+  searchLevel: 0,     // 0 = full query, 1 = genre+theme, 2 = genre only
+  startIndex: 0       // Pagination offset for Google Books API
 };
 
 // ===================================
@@ -147,6 +148,7 @@ function selectOption(category, value) {
     state.resultIndex = 0;
     state.seenBookIds = [];
     state.searchLevel = 0;
+    state.startIndex = 0;
 
     // Re-render genre options for the selected type
     const filteredGenres = state.type === "fiction" ? FICTION_GENRES : NON_FICTION_GENRES;
@@ -209,9 +211,9 @@ const MOOD_QUERY_MAP = {
 function buildSearchQuery(level) {
   const parts = [];
 
-  // Genre as subject (always included)
+  // Genre as keywords (always included)
   const genreTerms = GENRE_QUERY_MAP[state.genre] || state.genre;
-  parts.push(`subject:${genreTerms.split(" ")[0]}`);
+  parts.push(genreTerms);
 
   // Level 0: genre + theme + mood (most specific)
   // Level 1: genre + theme (drop mood)
@@ -232,9 +234,9 @@ function buildSearchQuery(level) {
 // ===================================
 // Google Books API — Search
 // ===================================
-async function searchGoogleBooks(level) {
+async function searchGoogleBooks(level, startIndex = 0) {
   const query = buildSearchQuery(level);
-  const url = `${CONFIG.GOOGLE_BOOKS_API_URL}?q=${encodeURIComponent(query)}&maxResults=${CONFIG.MAX_RESULTS}&langRestrict=en&orderBy=relevance&printType=books&key=${CONFIG.GOOGLE_BOOKS_API_KEY}`;
+  const url = `${CONFIG.GOOGLE_BOOKS_API_URL}?q=${encodeURIComponent(query)}&maxResults=${CONFIG.MAX_RESULTS}&startIndex=${startIndex}&langRestrict=en&orderBy=relevance&printType=books&key=${CONFIG.GOOGLE_BOOKS_API_KEY}`;
 
   try {
     const controller = new AbortController();
@@ -447,13 +449,14 @@ async function findAndShowBook() {
 
     let newResults = [];
 
-    // Try progressively broader searches until we find unseen results
+    // Try fetching more results: paginate first, then broaden query
     while (newResults.length === 0 && state.searchLevel <= 2) {
-      // 1. Get curated matches (only on first pass)
-      const curatedMatches = state.searchLevel === 0 ? getCuratedMatches() : [];
+      // 1. Get curated matches (only on first pass at level 0)
+      const curatedMatches = (state.searchLevel === 0 && state.startIndex === 0)
+        ? getCuratedMatches() : [];
 
-      // 2. Get API results, filter, and sort by popularity
-      const rawResults = await searchGoogleBooks(state.searchLevel);
+      // 2. Get API results with pagination
+      const rawResults = await searchGoogleBooks(state.searchLevel, state.startIndex);
       let filteredResults = filterResults(rawResults);
 
       // Fallback: if filters are too strict, relax them
@@ -485,9 +488,16 @@ async function findAndShowBook() {
       const merged = [...curatedMatches, ...uniqueApiResults];
       newResults = merged.filter((b) => !seenKeys.has(`${b.title.toLowerCase()}|${b.author.toLowerCase()}`));
 
-      // If nothing new at this level, try broader
+      // If nothing new, try next page first, then broaden query
       if (newResults.length === 0) {
-        state.searchLevel++;
+        if (rawResults.length >= CONFIG.MAX_RESULTS) {
+          // More pages available at this level — fetch next page
+          state.startIndex += CONFIG.MAX_RESULTS;
+        } else {
+          // No more pages — broaden search level
+          state.searchLevel++;
+          state.startIndex = 0;
+        }
       }
     }
 
@@ -565,6 +575,7 @@ function startOver() {
   state.resultIndex = 0;
   state.seenBookIds = [];
   state.searchLevel = 0;
+  state.startIndex = 0;
   goToStep("welcome");
 }
 
