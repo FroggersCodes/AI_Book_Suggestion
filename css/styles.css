@@ -159,6 +159,16 @@ body {
   padding-top: var(--progress-h);
 }
 
+/* Center the step question on all selection steps */
+#step-type h2,
+#step-format h2,
+#step-genre h2,
+#step-theme h2,
+#step-mood h2,
+#step-length h2 {
+  text-align: center;
+}
+
 h1 {
   font-family: var(--font-serif);
   font-size: clamp(2rem, 5vw, 2.75rem);
@@ -285,6 +295,7 @@ h2 {
 .options-grid-length {
   grid-template-columns: repeat(3, 1fr);
   max-width: 520px;
+  margin: 0 auto;
 }
 
 .option-card {
@@ -533,11 +544,13 @@ h2 {
 .options-grid-type {
   grid-template-columns: repeat(2, 1fr);
   max-width: 380px;
+  margin: 0 auto;
 }
 
 .options-grid-format {
   grid-template-columns: repeat(2, 1fr);
   max-width: 380px;
+  margin: 0 auto;
 }
 
 /* ===================================
