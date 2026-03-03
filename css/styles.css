@@ -119,6 +119,8 @@ body {
 }
 
 /* Add top padding when progress bar is visible */
+#step-type .step-content,
+#step-format .step-content,
 #step-genre .step-content,
 #step-theme .step-content,
 #step-mood .step-content,
@@ -183,21 +185,22 @@ h2 {
 
 .btn-secondary {
   display: inline-block;
-  background: transparent;
-  color: var(--text);
-  border: 2px solid var(--text);
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: 2px solid var(--btn-bg);
   padding: 14px 36px;
   font-size: 0.9375rem;
   font-weight: 600;
   border-radius: var(--radius);
   cursor: pointer;
-  transition: background var(--transition), color var(--transition);
+  transition: background var(--transition), transform 150ms ease;
   text-decoration: none;
 }
 
 .btn-secondary:hover {
-  background: var(--text);
-  color: var(--btn-text);
+  background: var(--btn-hover);
+  border-color: var(--btn-hover);
+  transform: translateY(-1px);
 }
 
 .btn-back {
@@ -230,22 +233,24 @@ h2 {
 }
 
 .option-card {
-  background: var(--card-bg);
-  border: 2px solid var(--card-border);
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: 2px solid var(--btn-bg);
   border-radius: var(--radius);
   padding: 24px 16px;
   text-align: center;
   cursor: pointer;
-  transition: border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+  transition: background 150ms ease, transform 150ms ease, box-shadow 150ms ease;
   opacity: 0;
   transform: translateY(10px);
   animation: cardIn 300ms ease forwards;
 }
 
 .option-card:hover {
-  border-color: var(--btn-bg);
+  background: var(--btn-hover);
+  border-color: var(--btn-hover);
   transform: translateY(-3px);
-  box-shadow: 0 6px 16px var(--card-hover-shadow);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .option-card:active {
@@ -255,11 +260,12 @@ h2 {
 .option-label {
   font-size: 1rem;
   font-weight: 600;
+  color: var(--btn-text);
 }
 
 .option-subtitle {
   font-size: 0.8125rem;
-  color: var(--text-muted);
+  color: rgba(245, 241, 235, 0.7);
   margin-top: 6px;
 }
 
@@ -374,6 +380,47 @@ h2 {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* ===================================
+   Maturity Badge
+   =================================== */
+.maturity-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin-bottom: 20px;
+}
+
+.maturity-badge.not-mature {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+
+.maturity-badge.mature {
+  background: #FFEBEE;
+  color: #C62828;
+}
+
+.maturity-badge.loading {
+  background: var(--progress-bg);
+  color: var(--text-muted);
+}
+
+/* ===================================
+   Type Selection (Fiction/Non-Fiction)
+   =================================== */
+.options-grid-type {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 400px;
+}
+
+.options-grid-format {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 400px;
 }
 
 /* ===================================

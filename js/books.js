@@ -1137,22 +1137,46 @@ const BOOKS = [
   },
 ];
 
-// Tag definitions for display purposes
-const GENRES = [
-  { id: "fiction", label: "Fiction" },
+// ===================================
+// Type & Format Options
+// ===================================
+const TYPES = [
+  { id: "fiction", label: "Fiction", subtitle: "Novels, stories & imagination" },
+  { id: "non-fiction", label: "Non-Fiction", subtitle: "Real world & knowledge" }
+];
+
+const FORMATS = [
+  { id: "series", label: "Series", subtitle: "Multi-book stories" },
+  { id: "standalone", label: "Standalone", subtitle: "Complete in one book" }
+];
+
+// ===================================
+// Genre Options — split by type
+// ===================================
+const FICTION_GENRES = [
+  { id: "fiction", label: "General Fiction" },
   { id: "sci-fi", label: "Sci-Fi" },
   { id: "fantasy", label: "Fantasy" },
   { id: "mystery", label: "Mystery" },
   { id: "romance", label: "Romance" },
-  { id: "non-fiction", label: "Non-Fiction" },
   { id: "horror", label: "Horror" },
   { id: "historical-fiction", label: "Historical Fiction" },
   { id: "thriller", label: "Thriller" },
-  { id: "biography", label: "Biography & Memoir" },
-  { id: "self-help", label: "Self-Help" },
   { id: "humor", label: "Humor" }
 ];
 
+const NON_FICTION_GENRES = [
+  { id: "non-fiction", label: "General Non-Fiction" },
+  { id: "biography", label: "Biography & Memoir" },
+  { id: "self-help", label: "Self-Help" }
+];
+
+// All genres combined (used for initial render)
+const GENRES = [...FICTION_GENRES, ...NON_FICTION_GENRES];
+
+// ===================================
+// Theme, Mood, Length Options
+// ===================================
 const THEMES = [
   { id: "love", label: "Love" },
   { id: "adventure", label: "Adventure" },
