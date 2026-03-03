@@ -10,7 +10,9 @@ const state = {
   mood: null,
   length: null,
   cachedResults: [],  // Google Books results for current search
-  resultIndex: 0      // Which result we're showing
+  resultIndex: 0,     // Which result we're showing
+  seenBookIds: [],    // Track shown books to avoid repeats
+  searchLevel: 0      // 0 = full query, 1 = genre+theme, 2 = genre only
 };
 
 // ===================================
@@ -143,6 +145,8 @@ function selectOption(category, value) {
     state.length = null;
     state.cachedResults = [];
     state.resultIndex = 0;
+    state.seenBookIds = [];
+    state.searchLevel = 0;
 
     // Re-render genre options for the selected type
     const filteredGenres = state.type === "fiction" ? FICTION_GENRES : NON_FICTION_GENRES;
@@ -202,20 +206,25 @@ const MOOD_QUERY_MAP = {
   "mysterious": "mysterious enigmatic atmospheric"
 };
 
-function buildSearchQuery() {
+function buildSearchQuery(level) {
   const parts = [];
 
-  // Genre as subject
+  // Genre as subject (always included)
   const genreTerms = GENRE_QUERY_MAP[state.genre] || state.genre;
   parts.push(`subject:${genreTerms.split(" ")[0]}`);
 
-  // Theme as additional keywords
-  const themeTerms = THEME_QUERY_MAP[state.theme] || state.theme;
-  parts.push(themeTerms);
+  // Level 0: genre + theme + mood (most specific)
+  // Level 1: genre + theme (drop mood)
+  // Level 2: genre only (broadest)
+  if (level <= 1) {
+    const themeTerms = THEME_QUERY_MAP[state.theme] || state.theme;
+    parts.push(themeTerms);
+  }
 
-  // Mood keywords (use first keyword only to avoid over-constraining)
-  const moodTerms = MOOD_QUERY_MAP[state.mood] || state.mood;
-  parts.push(moodTerms.split(" ")[0]);
+  if (level === 0) {
+    const moodTerms = MOOD_QUERY_MAP[state.mood] || state.mood;
+    parts.push(moodTerms.split(" ")[0]);
+  }
 
   return parts.join(" ");
 }
@@ -223,8 +232,8 @@ function buildSearchQuery() {
 // ===================================
 // Google Books API — Search
 // ===================================
-async function searchGoogleBooks() {
-  const query = buildSearchQuery();
+async function searchGoogleBooks(level) {
+  const query = buildSearchQuery(level);
   const url = `${CONFIG.GOOGLE_BOOKS_API_URL}?q=${encodeURIComponent(query)}&maxResults=${CONFIG.MAX_RESULTS}&langRestrict=en&orderBy=relevance&printType=books&key=${CONFIG.GOOGLE_BOOKS_API_KEY}`;
 
   try {
@@ -433,44 +442,57 @@ async function findAndShowBook() {
 
   // If no cached results or we've exhausted them, fetch new ones
   if (state.cachedResults.length === 0 || state.resultIndex >= state.cachedResults.length) {
-    // 1. Get curated matches (instant, no API call)
-    const curatedMatches = getCuratedMatches();
+    // Build set of already-seen book keys to avoid repeats
+    const seenKeys = new Set(state.seenBookIds);
 
-    // 2. Get API results, filter, and sort by popularity
-    const rawResults = await searchGoogleBooks();
-    const filteredResults = filterResults(rawResults);
-    const sortedApiResults = sortByPopularity(filteredResults);
+    let newResults = [];
 
-    // 3. Deduplicate: remove API results that match curated books
-    const curatedKeys = new Set(
-      curatedMatches.map((b) => `${b.title.toLowerCase()}|${b.author.toLowerCase()}`)
-    );
-    const uniqueApiResults = sortedApiResults.filter(
-      (b) => !curatedKeys.has(`${b.title.toLowerCase()}|${b.author.toLowerCase()}`)
-    );
+    // Try progressively broader searches until we find unseen results
+    while (newResults.length === 0 && state.searchLevel <= 2) {
+      // 1. Get curated matches (only on first pass)
+      const curatedMatches = state.searchLevel === 0 ? getCuratedMatches() : [];
 
-    // 4. Merge: curated first, then popularity-sorted API results
-    state.cachedResults = [...curatedMatches, ...uniqueApiResults];
-    state.resultIndex = 0;
+      // 2. Get API results, filter, and sort by popularity
+      const rawResults = await searchGoogleBooks(state.searchLevel);
+      let filteredResults = filterResults(rawResults);
 
-    // 5. Fallback: if no results, try API without length filter
-    if (state.cachedResults.length === 0 && rawResults.length > 0) {
-      let fallbackResults = rawResults;
-
-      // Still try format filter if applicable
-      if (state.type === "fiction" && state.format) {
-        const formatFiltered = rawResults.filter((book) => {
-          if (state.format === "series") return book.isSeries;
-          if (state.format === "standalone") return !book.isSeries;
-          return true;
-        });
-        if (formatFiltered.length > 0) {
-          fallbackResults = formatFiltered;
+      // Fallback: if filters are too strict, relax them
+      if (filteredResults.length === 0 && rawResults.length > 0) {
+        filteredResults = rawResults;
+        if (state.type === "fiction" && state.format) {
+          const formatFiltered = rawResults.filter((book) => {
+            if (state.format === "series") return book.isSeries;
+            if (state.format === "standalone") return !book.isSeries;
+            return true;
+          });
+          if (formatFiltered.length > 0) {
+            filteredResults = formatFiltered;
+          }
         }
       }
 
-      state.cachedResults = sortByPopularity(fallbackResults);
+      const sortedApiResults = sortByPopularity(filteredResults);
+
+      // 3. Deduplicate against curated books
+      const curatedKeys = new Set(
+        curatedMatches.map((b) => `${b.title.toLowerCase()}|${b.author.toLowerCase()}`)
+      );
+      const uniqueApiResults = sortedApiResults.filter(
+        (b) => !curatedKeys.has(`${b.title.toLowerCase()}|${b.author.toLowerCase()}`)
+      );
+
+      // 4. Merge and remove already-seen books
+      const merged = [...curatedMatches, ...uniqueApiResults];
+      newResults = merged.filter((b) => !seenKeys.has(`${b.title.toLowerCase()}|${b.author.toLowerCase()}`));
+
+      // If nothing new at this level, try broader
+      if (newResults.length === 0) {
+        state.searchLevel++;
+      }
     }
+
+    state.cachedResults = newResults;
+    state.resultIndex = 0;
   }
 
   if (state.cachedResults.length === 0) {
@@ -481,6 +503,9 @@ async function findAndShowBook() {
 
   const book = state.cachedResults[state.resultIndex];
   state.resultIndex++;
+
+  // Track this book so we never show it again
+  state.seenBookIds.push(`${book.title.toLowerCase()}|${book.author.toLowerCase()}`);
 
   // Populate cover
   const coverImg = $("#result-cover-img");
@@ -538,6 +563,8 @@ function startOver() {
   state.length = null;
   state.cachedResults = [];
   state.resultIndex = 0;
+  state.seenBookIds = [];
+  state.searchLevel = 0;
   goToStep("welcome");
 }
 
