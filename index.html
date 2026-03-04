@@ -3,25 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Find Your Next Read</title>
+  <title>BookBrew</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-  <!-- Progress bar (visible during steps 1-4) -->
+  <!-- Reusable SVG icon sprite -->
+  <svg style="display:none" aria-hidden="true">
+    <symbol id="icon-mug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 3C9 4.5 7 4.5 7 6"/>
+      <path d="M13 3C13 4.5 11 4.5 11 6"/>
+      <path d="M4 8h13v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/>
+      <path d="M17 11h2.5a1.5 1.5 0 0 1 0 3H17"/>
+    </symbol>
+  </svg>
+
+  <!-- Persistent logo — shown on every screen -->
+  <div id="site-logo">BookBrew</div>
+
+  <!-- Progress bar (visible during selection steps) -->
   <header id="progress-header" class="hidden">
-    <div class="progress-bar">
-      <div class="progress-segment" data-step="1"></div>
-      <div class="progress-segment" data-step="2"></div>
-      <div class="progress-segment" data-step="3"></div>
-      <div class="progress-segment" data-step="4"></div>
-    </div>
-    <div class="progress-labels">
-      <span data-step="1">Genre</span>
-      <span data-step="2">Theme</span>
-      <span data-step="3">Mood</span>
-      <span data-step="4">Length</span>
-    </div>
+    <div class="progress-bar" id="progress-bar"></div>
+    <div class="progress-labels" id="progress-labels"></div>
   </header>
 
   <main id="app">
@@ -29,13 +35,34 @@
     <!-- Welcome screen -->
     <section id="step-welcome" class="step active">
       <div class="step-content welcome-content">
-        <h1>Find Your Next Read</h1>
-        <p class="tagline">Answer four quick questions and we'll suggest the perfect book for you.</p>
-        <button class="btn-primary" id="btn-start">Get Started</button>
+        <h1>Let's steep your next read</h1>
+        <p class="tagline">Answer a few short questions to find your perfect book</p>
+        <button class="btn-primary" id="btn-start">
+          Get Started
+          <svg class="icon-mug" aria-hidden="true"><use href="#icon-mug"/></svg>
+        </button>
       </div>
     </section>
 
-    <!-- Step 1: Genre -->
+    <!-- Step: Fiction / Non-Fiction -->
+    <section id="step-type" class="step">
+      <div class="step-content">
+        <button class="btn-back" id="back-type" aria-label="Go back">&larr; Back</button>
+        <h2>What are you in the mood for?</h2>
+        <div class="options-grid options-grid-type" id="type-options"></div>
+      </div>
+    </section>
+
+    <!-- Step: Series / Standalone (fiction only) -->
+    <section id="step-format" class="step">
+      <div class="step-content">
+        <button class="btn-back" id="back-format" aria-label="Go back">&larr; Back</button>
+        <h2>Do you want a series or a standalone book?</h2>
+        <div class="options-grid options-grid-format" id="format-options"></div>
+      </div>
+    </section>
+
+    <!-- Step: Genre -->
     <section id="step-genre" class="step">
       <div class="step-content">
         <button class="btn-back" id="back-genre" aria-label="Go back">&larr; Back</button>
@@ -44,7 +71,7 @@
       </div>
     </section>
 
-    <!-- Step 2: Theme -->
+    <!-- Step: Theme -->
     <section id="step-theme" class="step">
       <div class="step-content">
         <button class="btn-back" id="back-theme" aria-label="Go back">&larr; Back</button>
@@ -53,7 +80,7 @@
       </div>
     </section>
 
-    <!-- Step 3: Mood -->
+    <!-- Step: Mood -->
     <section id="step-mood" class="step">
       <div class="step-content">
         <button class="btn-back" id="back-mood" aria-label="Go back">&larr; Back</button>
@@ -62,7 +89,7 @@
       </div>
     </section>
 
-    <!-- Step 4: Length -->
+    <!-- Step: Length -->
     <section id="step-length" class="step">
       <div class="step-content">
         <button class="btn-back" id="back-length" aria-label="Go back">&larr; Back</button>
@@ -81,6 +108,8 @@
           <div class="result-details">
             <h2 id="result-title"></h2>
             <p class="result-author" id="result-author"></p>
+            <p class="result-rating" id="result-rating"></p>
+            <span class="maturity-badge loading" id="result-maturity">Checking maturity...</span>
             <p class="result-description" id="result-description"></p>
             <a id="result-amazon-link" class="btn-primary btn-amazon" href="#" target="_blank" rel="noopener noreferrer">
               Buy on Amazon
@@ -97,7 +126,7 @@
     <!-- No match screen -->
     <section id="step-no-match" class="step">
       <div class="step-content welcome-content">
-        <h2>No match found</h2>
+        <h1>No match found</h1>
         <p class="tagline">We couldn't find a book matching all your criteria. Try a different combination!</p>
         <button class="btn-primary" id="btn-no-match-restart">Start Over</button>
       </div>
@@ -106,11 +135,12 @@
     <!-- Loading overlay -->
     <div id="loading-overlay" class="hidden">
       <div class="spinner"></div>
-      <p>Finding your perfect book...</p>
+      <p>Brewing your next read&hellip;</p>
     </div>
 
   </main>
 
+  <script src="js/config.js"></script>
   <script src="js/books.js"></script>
   <script src="js/app.js"></script>
 
