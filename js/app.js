@@ -62,7 +62,6 @@ const state = {
   genre: null,
   theme: null,
   mood: null,
-  length: null,
   cachedResults: [],  // Google Books results for current search
   resultIndex: 0,     // Which result we're showing
   seenBookIds: [],    // Track shown books to avoid repeats
@@ -85,7 +84,7 @@ function getStepOrder() {
   if (state.type === "fiction") {
     steps.push("format");
   }
-  steps.push("genre", "theme", "mood", "length");
+  steps.push("genre", "theme", "mood");
   return steps;
 }
 
@@ -98,8 +97,7 @@ function getProgressSteps() {
   steps.push(
     { id: "genre", label: "Genre" },
     { id: "theme", label: "Theme" },
-    { id: "mood", label: "Mood" },
-    { id: "length", label: "Length" }
+    { id: "mood", label: "Mood" }
   );
   return steps;
 }
@@ -470,13 +468,6 @@ function filterResults(books) {
       if (state.type === "fiction" && /\b(criticism|film studies|literary criticism|film criticism|performing arts)\b/.test(cats)) return false;
     }
 
-    // Filter by length (page count) — skip if page count is unknown
-    if (book.pageCount > 0) {
-      if (state.length === "short" && book.pageCount > 250) return false;
-      if (state.length === "medium" && (book.pageCount < 200 || book.pageCount > 500)) return false;
-      if (state.length === "long" && book.pageCount < 400) return false;
-    }
-
     // When format is selected: only show books confirmed in the correct UCSD pool
     // unless the user has opted into the wider Google Books search.
     if (state.type === "fiction" && state.format) {
@@ -709,7 +700,6 @@ function startOver() {
   state.genre = null;
   state.theme = null;
   state.mood = null;
-  state.length = null;
   state.cachedResults = [];
   state.resultIndex = 0;
   state.seenBookIds = [];
@@ -749,7 +739,6 @@ document.addEventListener("DOMContentLoaded", () => {
   renderOptions("genre-options", GENRES, "genre");
   renderOptions("theme-options", THEMES, "theme");
   renderOptions("mood-options", MOODS, "mood");
-  renderOptions("length-options", LENGTHS, "length");
 
   // Event listeners
   $("#btn-start").addEventListener("click", () => goToStep("type"));
@@ -764,5 +753,4 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#back-genre").addEventListener("click", goBack);
   $("#back-theme").addEventListener("click", goBack);
   $("#back-mood").addEventListener("click", goBack);
-  $("#back-length").addEventListener("click", goBack);
 });

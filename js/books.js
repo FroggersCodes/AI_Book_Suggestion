@@ -62,8 +62,3 @@ const MOODS = [
   { id: "mysterious", label: "Mysterious" }
 ];
 
-const LENGTHS = [
-  { id: "short", label: "Short", subtitle: "Under 250 pages" },
-  { id: "medium", label: "Medium", subtitle: "250 – 450 pages" },
-  { id: "long", label: "Long", subtitle: "450+ pages" }
-];
