@@ -453,6 +453,9 @@ const ACADEMIC_PATTERNS = [
 
 function filterResults(books) {
   return books.filter((book) => {
+    // Reject authors with PhD credentials — signals academic/analytical works
+    if (/\bph\.?d\.?\b/i.test(book.author)) return false;
+
     // Exclude academic/thesis works that slip through subject filters
     const textToCheck = book.title;
     if (ACADEMIC_PATTERNS.some((re) => re.test(textToCheck))) return false;
@@ -473,8 +476,10 @@ function filterResults(books) {
       if (state.length === "long" && book.pageCount < 400) return false;
     }
 
-    // Filter by series/standalone (fiction only)
+    // When format is selected: only show books confirmed in the correct UCSD pool.
+    // Google Books results not in the UCSD dataset are discarded entirely.
     if (state.type === "fiction" && state.format) {
+      if (ucsdData.loaded && !book.inUCSD) return false;
       if (state.format === "series" && !book.isSeries) return false;
       if (state.format === "standalone" && book.isSeries) return false;
     }
@@ -580,10 +585,12 @@ async function findAndShowBook() {
       let filteredResults = filterResults(rawResults);
 
       // Gradually relax filters rather than dropping all at once.
-      // Step 2: relax length constraint, keep format filter.
+      // Step 2: relax length constraint — keep PhD, UCSD pool, and format filters.
       if (filteredResults.length === 0 && rawResults.length > 0) {
         filteredResults = rawResults.filter((book) => {
+          if (/\bph\.?d\.?\b/i.test(book.author)) return false;
           if (state.type === "fiction" && state.format) {
+            if (ucsdData.loaded && !book.inUCSD) return false;
             if (state.format === "series" && !book.isSeries) return false;
             if (state.format === "standalone" && book.isSeries) return false;
           }
@@ -591,9 +598,19 @@ async function findAndShowBook() {
         });
       }
 
-      // Step 3: relax length + format — use all raw results for this search level.
+      // Step 3: relax everything except UCSD pool membership and series/standalone.
+      // The UCSD pool is never relaxed — we only show books from the right dataset.
       if (filteredResults.length === 0 && rawResults.length > 0) {
-        filteredResults = rawResults;
+        if (ucsdData.loaded && state.type === "fiction" && state.format) {
+          filteredResults = rawResults.filter((book) => {
+            if (!book.inUCSD) return false;
+            if (state.format === "series" && !book.isSeries) return false;
+            if (state.format === "standalone" && book.isSeries) return false;
+            return true;
+          });
+        } else {
+          filteredResults = rawResults;
+        }
       }
 
       // 2. Sort by popularity and remove already-seen books
