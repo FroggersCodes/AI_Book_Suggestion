@@ -204,6 +204,25 @@ h2 {
 }
 
 /* ===================================
+   No-Match Screen
+   =================================== */
+.no-match-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.no-match-warning {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  max-width: 360px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* ===================================
    Coffee Mug Icon
    =================================== */
 .icon-mug {

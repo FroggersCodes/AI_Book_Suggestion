@@ -67,7 +67,8 @@ const state = {
   resultIndex: 0,     // Which result we're showing
   seenBookIds: [],    // Track shown books to avoid repeats
   searchLevel: 0,     // 0 = genre+theme+mood, 1 = genre+theme, 2 = genre+theme hint, 3 = genre only
-  startIndex: 0       // Pagination offset for Google Books API
+  startIndex: 0,      // Pagination offset for Google Books API
+  wideSearch: false   // When true, UCSD pool restriction is lifted (user opted in)
 };
 
 // ===================================
@@ -476,10 +477,10 @@ function filterResults(books) {
       if (state.length === "long" && book.pageCount < 400) return false;
     }
 
-    // When format is selected: only show books confirmed in the correct UCSD pool.
-    // Google Books results not in the UCSD dataset are discarded entirely.
+    // When format is selected: only show books confirmed in the correct UCSD pool
+    // unless the user has opted into the wider Google Books search.
     if (state.type === "fiction" && state.format) {
-      if (ucsdData.loaded && !book.inUCSD) return false;
+      if (!state.wideSearch && ucsdData.loaded && !book.inUCSD) return false;
       if (state.format === "series" && !book.isSeries) return false;
       if (state.format === "standalone" && book.isSeries) return false;
     }
@@ -590,7 +591,7 @@ async function findAndShowBook() {
         filteredResults = rawResults.filter((book) => {
           if (/\bph\.?d\.?\b/i.test(book.author)) return false;
           if (state.type === "fiction" && state.format) {
-            if (ucsdData.loaded && !book.inUCSD) return false;
+            if (!state.wideSearch && ucsdData.loaded && !book.inUCSD) return false;
             if (state.format === "series" && !book.isSeries) return false;
             if (state.format === "standalone" && book.isSeries) return false;
           }
@@ -598,10 +599,9 @@ async function findAndShowBook() {
         });
       }
 
-      // Step 3: relax everything except UCSD pool membership and series/standalone.
-      // The UCSD pool is never relaxed — we only show books from the right dataset.
+      // Step 3: relax everything except UCSD pool + series/standalone (unless wide search).
       if (filteredResults.length === 0 && rawResults.length > 0) {
-        if (ucsdData.loaded && state.type === "fiction" && state.format) {
+        if (!state.wideSearch && ucsdData.loaded && state.type === "fiction" && state.format) {
           filteredResults = rawResults.filter((book) => {
             if (!book.inUCSD) return false;
             if (state.format === "series" && !book.isSeries) return false;
@@ -715,10 +715,20 @@ function startOver() {
   state.seenBookIds = [];
   state.searchLevel = 0;
   state.startIndex = 0;
+  state.wideSearch = false;
   goToStep("welcome");
 }
 
 function tryAnother() {
+  findAndShowBook();
+}
+
+function continueWithWideSearch() {
+  state.wideSearch = true;
+  state.cachedResults = [];
+  state.resultIndex = 0;
+  state.searchLevel = 0;
+  state.startIndex = 0;
   findAndShowBook();
 }
 
@@ -746,6 +756,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#btn-start-over").addEventListener("click", startOver);
   $("#btn-try-again").addEventListener("click", tryAnother);
   $("#btn-no-match-restart").addEventListener("click", startOver);
+  $("#btn-no-match-continue").addEventListener("click", continueWithWideSearch);
 
   // Back buttons — all use dynamic goBack
   $("#back-type").addEventListener("click", () => goToStep("welcome"));
