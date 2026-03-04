@@ -594,7 +594,8 @@ h2 {
 
 @media (max-width: 480px) {
   .step {
-    padding: 16px;
+    /* Keep top clearance for the fixed logo bar; compress sides/bottom only */
+    padding: calc(var(--logo-h) + 16px) 16px 16px;
   }
 
   h1 {

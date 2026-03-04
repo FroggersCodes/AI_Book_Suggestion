@@ -1,4 +1,58 @@
 // ===================================
+// UCSD Dataset (primary book pool)
+// ===================================
+const ucsdData = {
+  loaded: false,
+  seriesBookIds: new Set(),       // best_book_ids that belong to a series
+  standaloneBookIds: new Set(),   // best_book_ids confirmed standalone
+  titleToEntry: new Map()         // normalizedTitle → { book_id, isSeries, popularityScore }
+};
+
+function normalizeTitle(title) {
+  return title.toLowerCase()
+    .replace(/^(the|a|an)\s+/i, '')   // strip leading articles
+    .replace(/[^\w\s]/g, ' ')          // punctuation → space
+    .replace(/\s+/g, ' ')              // collapse whitespace
+    .trim();
+}
+
+async function loadUCSDData() {
+  try {
+    const [seriesMapping, standaloneArr, worksArr, statsArr] = await Promise.all([
+      fetch('book_series_mapping 2.json').then(r => r.json()),
+      fetch('standalone_books.json').then(r => r.json()),
+      fetch('works_filtered.json').then(r => r.json()),
+      fetch('book_stats.json').then(r => r.json())
+    ]);
+
+    for (const id of Object.keys(seriesMapping)) ucsdData.seriesBookIds.add(id);
+    for (const b of standaloneArr) ucsdData.standaloneBookIds.add(b.book_id);
+
+    const popularityMap = new Map(statsArr.map(b => [b.book_id, b.popularity_score]));
+
+    for (const work of worksArr) {
+      if (!work.original_title || !work.best_book_id) continue;
+      const key = normalizeTitle(work.original_title);
+      if (ucsdData.titleToEntry.has(key)) continue;
+      const id = work.best_book_id;
+      const isSeries = ucsdData.seriesBookIds.has(id)
+        ? true
+        : ucsdData.standaloneBookIds.has(id) ? false : null;
+      ucsdData.titleToEntry.set(key, {
+        book_id: id,
+        isSeries,
+        popularityScore: popularityMap.get(id) || 0
+      });
+    }
+
+    ucsdData.loaded = true;
+    console.log(`[BookBrew] UCSD loaded: ${ucsdData.titleToEntry.size} titles indexed`);
+  } catch (e) {
+    console.warn('[BookBrew] UCSD load failed — using regex fallback', e);
+  }
+}
+
+// ===================================
 // State
 // ===================================
 const state = {
@@ -297,8 +351,23 @@ function parseGoogleBookResult(item) {
   const isbn13 = identifiers.find((id) => id.type === "ISBN_13")?.identifier || "";
   const isbn10 = identifiers.find((id) => id.type === "ISBN_10")?.identifier || "";
 
-  // Determine series info
-  const isSeries = detectSeries(info);
+  // Determine series info — UCSD is authoritative; regex is fallback
+  let isSeries;
+  let inUCSD = false;
+  let ucsdPopularity = 0;
+
+  if (ucsdData.loaded) {
+    const entry = ucsdData.titleToEntry.get(normalizeTitle(info.title));
+    if (entry) {
+      inUCSD = true;
+      ucsdPopularity = entry.popularityScore;
+      isSeries = entry.isSeries !== null ? entry.isSeries : detectSeries(info);
+    } else {
+      isSeries = detectSeries(info);
+    }
+  } else {
+    isSeries = detectSeries(info);
+  }
 
   return {
     id: item.id,
@@ -313,6 +382,8 @@ function parseGoogleBookResult(item) {
     maturityRating: info.maturityRating || "NOT_MATURE",
     thumbnail: info.imageLinks?.thumbnail?.replace("http:", "https:") || "",
     isSeries,
+    inUCSD,
+    ucsdPopularity,
     seriesInfo: item.volumeInfo?.seriesInfo || null,
     ratingsCount: info.ratingsCount || 0,
     averageRating: info.averageRating || 0
@@ -398,7 +469,14 @@ function filterResults(books) {
 // ===================================
 function sortByPopularity(books) {
   return books.slice().sort((a, b) => {
-    // Primary: ratingsCount descending. Secondary: averageRating descending.
+    // UCSD-curated books always rank above non-UCSD (primary pool first)
+    if (a.inUCSD !== b.inUCSD) return a.inUCSD ? -1 : 1;
+    // Among UCSD books: sort by UCSD popularity score
+    if (a.inUCSD && b.inUCSD) {
+      const diff = (b.ucsdPopularity || 0) - (a.ucsdPopularity || 0);
+      if (diff !== 0) return diff;
+    }
+    // Fallback (non-UCSD or tied): Google Books ratings
     const scoreA = (a.ratingsCount || 0) * 1000 + (a.averageRating || 0);
     const scoreB = (b.ratingsCount || 0) * 1000 + (b.averageRating || 0);
     return scoreB - scoreA;
@@ -612,6 +690,9 @@ function tryAnother() {
 // Initialize
 // ===================================
 document.addEventListener("DOMContentLoaded", () => {
+  // Load UCSD dataset in the background (enriches results once ready)
+  loadUCSDData();
+
   // Render type options
   renderOptions("type-options", TYPES, "type");
 
