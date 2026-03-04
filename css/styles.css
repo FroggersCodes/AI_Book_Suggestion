@@ -407,12 +407,6 @@ h2 {
   vertical-align: middle;
 }
 
-.rating-loading {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  font-style: italic;
-}
-
 /* Full and empty stars are plain inline text */
 .star-full,
 .star-empty {
