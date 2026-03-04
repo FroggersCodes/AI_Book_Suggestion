@@ -241,8 +241,12 @@ const GENRE_SUBJECT_MAP = {
 
 // Extra keywords added alongside subject to improve relevance
 const GENRE_KEYWORDS_MAP = {
+  "fantasy": "novel fiction",
+  "sci-fi": "novel fiction",
+  "horror": "novel fiction",
   "mystery": "detective crime",
   "thriller": "suspense",
+  "romance": "novel fiction",
   "biography": "memoir",
   "self-help": "personal development",
   "humor": "comedy"
@@ -431,6 +435,20 @@ const ACADEMIC_PATTERNS = [
   /\bacademic journal\b/i,
   /\blecture notes\b/i,
   /\bconference paper\b/i,
+  // Analysis / criticism / non-fiction commentary books
+  /\ban analysis of\b/i,
+  /\bthe analysis of\b/i,
+  /\ba study of\b/i,
+  /\bthe study of\b/i,
+  /\bliterary criticism\b/i,
+  /\bfilm criticism\b/i,
+  /\bcritical companion\b/i,
+  /\ba companion to\b/i,
+  /\bthe companion to\b/i,
+  /\ban introduction to\b/i,
+  /\bguide to\b/i,
+  /\bhistory of\b/i,
+  /\bencyclopedia of\b/i,
 ];
 
 function filterResults(books) {
@@ -440,11 +458,12 @@ function filterResults(books) {
     if (ACADEMIC_PATTERNS.some((re) => re.test(textToCheck))) return false;
 
     // If Google Books returned category data, use it to reject obvious type mismatches.
-    // E.g. a user who selected Fiction should not see Juvenile Nonfiction books.
     const cats = (book.categories || []).join(" ").toLowerCase();
     if (cats) {
       if (state.type === "fiction" && /\bnonfiction\b/.test(cats)) return false;
       if (state.type === "non-fiction" && /\bfiction\b/.test(cats) && !/nonfiction/.test(cats)) return false;
+      // Reject criticism/analysis/film categories when user wants fiction
+      if (state.type === "fiction" && /\b(criticism|film studies|literary criticism|film criticism|performing arts)\b/.test(cats)) return false;
     }
 
     // Filter by length (page count) — skip if page count is unknown
