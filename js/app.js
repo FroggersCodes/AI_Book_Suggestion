@@ -444,6 +444,37 @@ function assessMaturity(book) {
 }
 
 // ===================================
+// Hardcover — Ratings
+// ===================================
+async function fetchHardcoverRating(isbn13, isbn10) {
+  if (!CONFIG.HARDCOVER_API_KEY) return null;
+  const isbn = isbn13 || isbn10;
+  const field = isbn13 ? "isbn_13" : "isbn_10";
+  if (!isbn) return null;
+
+  const query = `query { editions(where: { ${field}: { _eq: "${isbn}" } }, limit: 1) { book { rating ratings_count } } }`;
+
+  try {
+    const response = await fetch(CONFIG.HARDCOVER_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "authorization": CONFIG.HARDCOVER_API_KEY
+      },
+      body: JSON.stringify({ query })
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    const hcBook = data?.data?.editions?.[0]?.book;
+    if (!hcBook?.rating) return null;
+    return { rating: hcBook.rating, ratingsCount: hcBook.ratings_count || 0 };
+  } catch (e) {
+    console.error("Hardcover API error:", e);
+    return null;
+  }
+}
+
+// ===================================
 // Star Rating
 // ===================================
 function renderStars(rating) {
@@ -549,17 +580,14 @@ async function findAndShowBook() {
   $("#result-title").textContent = displayTitle;
   $("#result-author").textContent = `by ${book.author}`;
 
-  // Star rating — links to Amazon reviews
+  // Star rating — fetched from Hardcover after the card is shown
   const ratingEl = $("#result-rating");
-  if (book.averageRating) {
-    const stars = renderStars(book.averageRating);
-    const reviewsUrl = book.isbn10
-      ? `https://www.amazon.com/dp/${book.isbn10}#customerReviews`
-      : `https://www.amazon.com/s?k=${encodeURIComponent(book.title + " " + book.author)}`;
-    ratingEl.innerHTML = `<a href="${reviewsUrl}" class="reviews-link" target="_blank" rel="noopener noreferrer">Reviews</a>: <span class="result-stars">${stars}</span> <span class="rating-value">${book.averageRating.toFixed(1)}</span>`;
-  } else {
-    ratingEl.innerHTML = "";
-  }
+  const reviewsUrl = book.isbn10
+    ? `https://www.amazon.com/dp/${book.isbn10}#customerReviews`
+    : `https://www.amazon.com/s?k=${encodeURIComponent(book.title + " " + book.author)}`;
+  ratingEl.innerHTML = CONFIG.HARDCOVER_API_KEY
+    ? '<span class="rating-loading">Loading rating\u2026</span>'
+    : "";
 
   // Truncate long descriptions
   const desc = book.description || "No description available.";
@@ -584,6 +612,17 @@ async function findAndShowBook() {
   // Show result
   $("#loading-overlay").classList.add("hidden");
   goToStep("result");
+
+  // Fetch Hardcover rating asynchronously — updates once the API responds
+  fetchHardcoverRating(book.isbn13, book.isbn10).then((hcRating) => {
+    const rating = hcRating?.rating ?? (book.averageRating || 0);
+    if (rating) {
+      const stars = renderStars(rating);
+      ratingEl.innerHTML = `<a href="${reviewsUrl}" class="reviews-link" target="_blank" rel="noopener noreferrer">Reviews</a>: <span class="result-stars">${stars}</span> <span class="rating-value">${rating.toFixed(1)}</span>`;
+    } else {
+      ratingEl.innerHTML = "";
+    }
+  });
 }
 
 // ===================================
