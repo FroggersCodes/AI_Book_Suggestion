@@ -21,128 +21,270 @@
     </symbol>
   </svg>
 
-  <!-- Persistent logo — shown on every screen -->
-  <div id="site-logo">BookBrew</div>
-
-  <!-- Progress bar (visible during selection steps) -->
-  <header id="progress-header" class="hidden">
-    <div class="progress-bar" id="progress-bar"></div>
-    <div class="progress-labels" id="progress-labels"></div>
+  <!-- Combined logo + navigation bar -->
+  <header id="site-header">
+    <div class="nav-inner">
+      <div id="site-logo">BookBrew</div>
+      <nav class="nav-tabs">
+        <button class="nav-tab active" data-tab="simple">Simple</button>
+        <button class="nav-tab" data-tab="advanced">Advanced</button>
+        <button class="nav-tab" data-tab="track">Track</button>
+        <button class="nav-tab" data-tab="contact">Contact Us</button>
+      </nav>
+    </div>
   </header>
 
   <main id="app">
 
-    <!-- Welcome screen -->
-    <section id="step-welcome" class="step active">
-      <div class="step-content welcome-content">
-        <h1>Let's steep your next read</h1>
-        <p class="tagline">Answer a few short questions to find your perfect book</p>
-        <button class="btn-primary" id="btn-start">
-          Get Started
-          <svg class="icon-mug" aria-hidden="true"><use href="#icon-mug"/></svg>
-        </button>
-      </div>
-    </section>
+    <!-- ============================
+         SIMPLE MODE
+         ============================ -->
+    <div id="page-simple" class="page-container page-active">
 
-    <!-- Step: Fiction / Non-Fiction -->
-    <section id="step-type" class="step">
-      <div class="step-content">
-        <button class="btn-back" id="back-type" aria-label="Go back">&larr; Back</button>
-        <h2>What are you in the mood for?</h2>
-        <div class="options-grid options-grid-type" id="type-options"></div>
-      </div>
-    </section>
+      <!-- Simple mode progress bar -->
+      <header id="simple-progress-header" class="progress-header-bar hidden">
+        <div class="progress-bar" id="simple-progress-bar"></div>
+        <div class="progress-labels" id="simple-progress-labels"></div>
+      </header>
 
-    <!-- Step: Series / Standalone (fiction only) -->
-    <section id="step-format" class="step">
-      <div class="step-content">
-        <button class="btn-back" id="back-format" aria-label="Go back">&larr; Back</button>
-        <h2>Do you want a series or a standalone book?</h2>
-        <div class="options-grid options-grid-format" id="format-options"></div>
-      </div>
-    </section>
+      <!-- Welcome screen -->
+      <section id="step-simple-welcome" class="step active">
+        <div class="step-content welcome-content">
+          <h1>Let's steep your next read</h1>
+          <p class="tagline">Answer a few quick questions to find your perfect book</p>
+          <button class="btn-primary" id="btn-simple-start">
+            Get Started
+            <svg class="icon-mug" aria-hidden="true"><use href="#icon-mug"/></svg>
+          </button>
+        </div>
+      </section>
 
-    <!-- Step: Genre -->
-    <section id="step-genre" class="step">
-      <div class="step-content">
-        <button class="btn-back" id="back-genre" aria-label="Go back">&larr; Back</button>
-        <h2>What genre are you in the mood for?</h2>
-        <div class="options-grid" id="genre-options"></div>
-      </div>
-    </section>
+      <!-- Step: Genre -->
+      <section id="step-simple-genre" class="step">
+        <div class="step-content">
+          <button class="btn-back" id="back-simple-genre" aria-label="Go back">&larr; Back</button>
+          <h2>What genre interests you?</h2>
+          <div class="options-grid" id="simple-genre-options"></div>
+        </div>
+      </section>
 
-    <!-- Step: Theme -->
-    <section id="step-theme" class="step">
-      <div class="step-content">
-        <button class="btn-back" id="back-theme" aria-label="Go back">&larr; Back</button>
-        <h2>What theme interests you?</h2>
-        <div class="options-grid" id="theme-options"></div>
-      </div>
-    </section>
+      <!-- Step: Theme -->
+      <section id="step-simple-theme" class="step">
+        <div class="step-content">
+          <button class="btn-back" id="back-simple-theme" aria-label="Go back">&larr; Back</button>
+          <h2>What theme interests you?</h2>
+          <div class="options-grid" id="simple-theme-options"></div>
+        </div>
+      </section>
 
-    <!-- Step: Mood -->
-    <section id="step-mood" class="step">
-      <div class="step-content">
-        <button class="btn-back" id="back-mood" aria-label="Go back">&larr; Back</button>
-        <h2>What mood are you looking for?</h2>
-        <div class="options-grid" id="mood-options"></div>
-      </div>
-    </section>
+      <!-- Step: Mood -->
+      <section id="step-simple-mood" class="step">
+        <div class="step-content">
+          <button class="btn-back" id="back-simple-mood" aria-label="Go back">&larr; Back</button>
+          <h2>What mood are you looking for?</h2>
+          <div class="options-grid" id="simple-mood-options"></div>
+        </div>
+      </section>
 
-    <!-- Step: Length -->
-    <section id="step-length" class="step">
-      <div class="step-content">
-        <button class="btn-back" id="back-length" aria-label="Go back">&larr; Back</button>
-        <h2>How long of a read do you want?</h2>
-        <div class="options-grid options-grid-length" id="length-options"></div>
-      </div>
-    </section>
+      <!-- Step: Length -->
+      <section id="step-simple-length" class="step">
+        <div class="step-content">
+          <button class="btn-back" id="back-simple-length" aria-label="Go back">&larr; Back</button>
+          <h2>How long of a read do you want?</h2>
+          <div class="options-grid options-grid-length" id="simple-length-options"></div>
+        </div>
+      </section>
 
-    <!-- Result screen -->
-    <section id="step-result" class="step">
-      <div class="step-content">
-        <div class="result-card">
-          <div class="result-cover">
-            <img id="result-cover-img" src="" alt="Book cover">
+      <!-- Result screen -->
+      <section id="step-simple-result" class="step">
+        <div class="step-content">
+          <div class="result-card">
+            <div class="result-cover">
+              <img id="simple-result-cover-img" src="" alt="Book cover">
+            </div>
+            <div class="result-details">
+              <h2 id="simple-result-title"></h2>
+              <p class="result-author" id="simple-result-author"></p>
+              <p class="result-rating" id="simple-result-rating"></p>
+              <span class="maturity-badge loading" id="simple-result-maturity">Checking maturity...</span>
+              <p class="result-description" id="simple-result-description"></p>
+              <a id="simple-result-amazon-link" class="btn-primary btn-amazon" href="#" target="_blank" rel="noopener noreferrer">
+                Buy on Amazon
+              </a>
+            </div>
           </div>
-          <div class="result-details">
-            <h2 id="result-title"></h2>
-            <p class="result-author" id="result-author"></p>
-            <p class="result-rating" id="result-rating"></p>
-            <span class="maturity-badge loading" id="result-maturity">Checking maturity...</span>
-            <p class="result-description" id="result-description"></p>
-            <a id="result-amazon-link" class="btn-primary btn-amazon" href="#" target="_blank" rel="noopener noreferrer">
-              Buy on Amazon
-            </a>
+          <div class="result-actions">
+            <button class="btn-secondary" id="btn-simple-try-again">Try Another</button>
+            <button class="btn-secondary" id="btn-simple-start-over">Start Over</button>
           </div>
         </div>
-        <div class="result-actions">
-          <button class="btn-secondary" id="btn-try-again">Try Another</button>
-          <button class="btn-secondary" id="btn-start-over">Start Over</button>
+      </section>
+
+      <!-- No match screen -->
+      <section id="step-simple-no-match" class="step">
+        <div class="step-content welcome-content">
+          <h1>No match found</h1>
+          <p class="tagline">We couldn't find a book matching your criteria. Try a different combination!</p>
+          <button class="btn-primary" id="btn-simple-no-match-restart">Start Over</button>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- No match screen -->
-    <section id="step-no-match" class="step">
-      <div class="step-content welcome-content">
-        <h1>No match found</h1>
-        <p class="tagline">We couldn't find a book matching all your criteria. Try a different combination!</p>
-        <button class="btn-primary" id="btn-no-match-restart">Start Over</button>
+      <!-- Loading overlay -->
+      <div id="simple-loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Brewing your next read&hellip;</p>
       </div>
-    </section>
 
-    <!-- Loading overlay -->
-    <div id="loading-overlay" class="hidden">
-      <div class="spinner"></div>
-      <p>Brewing your next read&hellip;</p>
+    </div>
+
+    <!-- ============================
+         ADVANCED MODE
+         ============================ -->
+    <div id="page-advanced" class="page-container">
+
+      <!-- Progress bar (visible during selection steps) -->
+      <header id="progress-header" class="progress-header-bar hidden">
+        <div class="progress-bar" id="progress-bar"></div>
+        <div class="progress-labels" id="progress-labels"></div>
+      </header>
+
+      <!-- Welcome screen -->
+      <section id="step-welcome" class="step active">
+        <div class="step-content welcome-content">
+          <h1>Let's steep your next read</h1>
+          <p class="tagline">Answer a few short questions to find your perfect book</p>
+          <button class="btn-primary" id="btn-start">
+            Get Started
+            <svg class="icon-mug" aria-hidden="true"><use href="#icon-mug"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- Step: Fiction / Non-Fiction -->
+      <section id="step-type" class="step">
+        <div class="step-content">
+          <button class="btn-back" id="back-type" aria-label="Go back">&larr; Back</button>
+          <h2>What are you in the mood for?</h2>
+          <div class="options-grid options-grid-type" id="type-options"></div>
+        </div>
+      </section>
+
+      <!-- Step: Series / Standalone (fiction only) -->
+      <section id="step-format" class="step">
+        <div class="step-content">
+          <button class="btn-back" id="back-format" aria-label="Go back">&larr; Back</button>
+          <h2>Do you want a series or a standalone book?</h2>
+          <div class="options-grid options-grid-format" id="format-options"></div>
+        </div>
+      </section>
+
+      <!-- Step: Genre -->
+      <section id="step-genre" class="step">
+        <div class="step-content">
+          <button class="btn-back" id="back-genre" aria-label="Go back">&larr; Back</button>
+          <h2>What genre are you in the mood for?</h2>
+          <div class="options-grid" id="genre-options"></div>
+        </div>
+      </section>
+
+      <!-- Step: Theme -->
+      <section id="step-theme" class="step">
+        <div class="step-content">
+          <button class="btn-back" id="back-theme" aria-label="Go back">&larr; Back</button>
+          <h2>What theme interests you?</h2>
+          <div class="options-grid" id="theme-options"></div>
+        </div>
+      </section>
+
+      <!-- Step: Mood -->
+      <section id="step-mood" class="step">
+        <div class="step-content">
+          <button class="btn-back" id="back-mood" aria-label="Go back">&larr; Back</button>
+          <h2>What mood are you looking for?</h2>
+          <div class="options-grid" id="mood-options"></div>
+        </div>
+      </section>
+
+      <!-- Step: Length -->
+      <section id="step-length" class="step">
+        <div class="step-content">
+          <button class="btn-back" id="back-length" aria-label="Go back">&larr; Back</button>
+          <h2>How long of a read do you want?</h2>
+          <div class="options-grid options-grid-length" id="length-options"></div>
+        </div>
+      </section>
+
+      <!-- Result screen -->
+      <section id="step-result" class="step">
+        <div class="step-content">
+          <div class="result-card">
+            <div class="result-cover">
+              <img id="result-cover-img" src="" alt="Book cover">
+            </div>
+            <div class="result-details">
+              <h2 id="result-title"></h2>
+              <p class="result-author" id="result-author"></p>
+              <p class="result-rating" id="result-rating"></p>
+              <span class="maturity-badge loading" id="result-maturity">Checking maturity...</span>
+              <p class="result-description" id="result-description"></p>
+              <a id="result-amazon-link" class="btn-primary btn-amazon" href="#" target="_blank" rel="noopener noreferrer">
+                Buy on Amazon
+              </a>
+            </div>
+          </div>
+          <div class="result-actions">
+            <button class="btn-secondary" id="btn-try-again">Try Another</button>
+            <button class="btn-secondary" id="btn-start-over">Start Over</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- No match screen -->
+      <section id="step-no-match" class="step">
+        <div class="step-content welcome-content">
+          <h1>No match found</h1>
+          <p class="tagline">We couldn't find a book matching all your criteria. Try a different combination!</p>
+          <button class="btn-primary" id="btn-no-match-restart">Start Over</button>
+        </div>
+      </section>
+
+      <!-- Loading overlay -->
+      <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Brewing your next read&hellip;</p>
+      </div>
+
+    </div>
+
+    <!-- ============================
+         TRACK PAGE
+         ============================ -->
+    <div id="page-track" class="page-container">
+      <div class="static-page">
+        <h1>Coming Soon</h1>
+        <p class="tagline">Track your reading journey — set goals, log books, and watch your library grow.</p>
+      </div>
+    </div>
+
+    <!-- ============================
+         CONTACT PAGE
+         ============================ -->
+    <div id="page-contact" class="page-container">
+      <div class="static-page">
+        <h1>Contact Us</h1>
+        <p class="tagline">Feedback or comments? We'd love to hear from you.</p>
+        <a href="mailto:teambookbrew@gmail.com" class="contact-email">teambookbrew@gmail.com</a>
+      </div>
     </div>
 
   </main>
 
   <script src="js/config.js"></script>
+  <script src="js/simple-books.js"></script>
   <script src="js/books.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/simple.js"></script>
+  <script src="js/nav.js"></script>
 
 </body>
 </html>

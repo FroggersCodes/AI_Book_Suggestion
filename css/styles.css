@@ -20,8 +20,8 @@
   --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  --logo-h: 54px;    /* height of #site-logo bar */
-  --progress-h: 56px; /* height of #progress-header */
+  --header-h: 88px;    /* height of combined logo + nav bar */
+  --progress-h: 56px;  /* height of progress bar */
 }
 
 /* ===================================
@@ -43,34 +43,85 @@ body {
 }
 
 /* ===================================
-   Persistent Site Logo
+   Site Header (Logo + Nav)
    =================================== */
-#site-logo {
+#site-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 110;
-  height: var(--logo-h);
+  background: var(--bg);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.nav-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: var(--bg);
+  justify-content: space-between;
+  padding: 0 24px;
+  height: var(--header-h);
+}
+
+#site-logo {
   font-family: var(--font-serif);
   font-weight: 400;
   font-size: 1.5rem;
   letter-spacing: 0.06em;
   color: var(--text);
-  /* subtle separator from content below */
-  border-bottom: 1px solid var(--card-border);
+  flex-shrink: 0;
+}
+
+/* Navigation Tabs */
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-tab {
+  background: none;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color var(--transition), background var(--transition);
+  letter-spacing: 0.01em;
+}
+
+.nav-tab:hover {
+  color: var(--text);
+  background: rgba(35, 30, 24, 0.05);
+}
+
+.nav-tab.active {
+  color: var(--text);
+  font-weight: 600;
+  background: rgba(35, 30, 24, 0.08);
+}
+
+/* ===================================
+   Page Containers
+   =================================== */
+.page-container {
+  display: none;
+}
+
+.page-container.page-active {
+  display: block;
 }
 
 /* ===================================
    Progress Header
    =================================== */
-#progress-header {
+.progress-header-bar {
   position: fixed;
-  top: var(--logo-h);   /* sits directly below the logo */
+  top: var(--header-h);
   left: 0;
   right: 0;
   z-index: 100;
@@ -78,7 +129,7 @@ body {
   padding: 14px 24px 10px;
 }
 
-#progress-header.hidden {
+.progress-header-bar.hidden {
   display: none;
 }
 
@@ -132,8 +183,7 @@ body {
 .step {
   display: none;
   min-height: 100vh;
-  /* top padding clears the fixed logo bar; sides/bottom stay at 24px */
-  padding: calc(var(--logo-h) + 24px) 24px 24px;
+  padding: calc(var(--header-h) + 24px) 24px 24px;
 }
 
 .step.active {
@@ -149,13 +199,17 @@ body {
   margin: 0 auto;
 }
 
-/* Selection steps: also clear the progress bar that sits below the logo */
+/* Selection steps: also clear the progress bar that sits below the header */
 #step-type .step-content,
 #step-format .step-content,
 #step-genre .step-content,
 #step-theme .step-content,
 #step-mood .step-content,
-#step-length .step-content {
+#step-length .step-content,
+#step-simple-genre .step-content,
+#step-simple-theme .step-content,
+#step-simple-mood .step-content,
+#step-simple-length .step-content {
   padding-top: var(--progress-h);
 }
 
@@ -165,7 +219,11 @@ body {
 #step-genre h2,
 #step-theme h2,
 #step-mood h2,
-#step-length h2 {
+#step-length h2,
+#step-simple-genre h2,
+#step-simple-theme h2,
+#step-simple-mood h2,
+#step-simple-length h2 {
   text-align: center;
 }
 
@@ -193,7 +251,6 @@ h2 {
   text-align: center;
 }
 
-
 .tagline {
   font-family: var(--font-sans);
   font-size: 1rem;
@@ -210,7 +267,6 @@ h2 {
   width: 22px;
   height: 22px;
   flex-shrink: 0;
-  /* inherits currentColor — matches button text */
 }
 
 /* ===================================
@@ -407,13 +463,11 @@ h2 {
   vertical-align: middle;
 }
 
-/* Full and empty stars are plain inline text */
 .star-full,
 .star-empty {
   line-height: 1;
 }
 
-/* Half star: ☆ is the base (empty outline); .fill clips ★ to the left 50% */
 .star-half {
   display: inline-block;
   position: relative;
@@ -456,7 +510,7 @@ h2 {
 /* ===================================
    Loading Overlay
    =================================== */
-#loading-overlay {
+.loading-overlay {
   position: fixed;
   inset: 0;
   background: var(--bg);
@@ -467,11 +521,11 @@ h2 {
   z-index: 200;
 }
 
-#loading-overlay.hidden {
+.loading-overlay.hidden {
   display: none;
 }
 
-#loading-overlay p {
+.loading-overlay p {
   margin-top: 24px;
   font-family: var(--font-sans);
   font-size: 0.9375rem;
@@ -560,6 +614,35 @@ h2 {
 }
 
 /* ===================================
+   Static Pages (Track, Contact)
+   =================================== */
+.static-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--header-h) + 24px) 24px 24px;
+  text-align: center;
+}
+
+.contact-email {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--text-muted);
+  transition: text-decoration-color 150ms ease;
+}
+
+.contact-email:hover {
+  text-decoration-color: var(--text);
+}
+
+/* ===================================
    Responsive
    =================================== */
 @media (max-width: 768px) {
@@ -592,10 +675,35 @@ h2 {
   }
 }
 
+@media (max-width: 600px) {
+  :root {
+    --header-h: 96px;
+  }
+
+  .nav-inner {
+    flex-direction: column;
+    padding: 10px 16px;
+    height: auto;
+    gap: 6px;
+  }
+
+  #site-logo {
+    font-size: 1.25rem;
+  }
+
+  .nav-tabs {
+    gap: 2px;
+  }
+
+  .nav-tab {
+    font-size: 0.8125rem;
+    padding: 6px 10px;
+  }
+}
+
 @media (max-width: 480px) {
   .step {
-    /* Keep top clearance for the fixed logo bar; compress sides/bottom only */
-    padding: calc(var(--logo-h) + 16px) 16px 16px;
+    padding: calc(var(--header-h) + 16px) 16px 16px;
   }
 
   h1 {
@@ -628,5 +736,9 @@ h2 {
 
   .result-actions .btn-secondary {
     text-align: center;
+  }
+
+  .static-page {
+    padding: calc(var(--header-h) + 16px) 16px 16px;
   }
 }

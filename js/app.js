@@ -107,7 +107,7 @@ function getProgressSteps() {
 // Step Navigation
 // ===================================
 function goToStep(stepName) {
-  $$(".step.active").forEach((el) => el.classList.remove("active"));
+  $$("#page-advanced .step.active").forEach((el) => el.classList.remove("active"));
 
   const target = $(`#step-${stepName}`);
   if (target) {
