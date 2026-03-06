@@ -659,9 +659,50 @@ async function findAndShowBook() {
     : `https://www.amazon.com/s?k=${encodeURIComponent(book.title + " " + book.author)}`;
   $("#result-amazon-link").href = amazonLink;
 
+  // Google Books link
+  $("#result-google-link").href = `https://books.google.com/books?id=${book.id}`;
+
   // Show result
   $("#loading-overlay").classList.add("hidden");
   goToStep("result");
+}
+
+// ===================================
+// Share Result
+// ===================================
+async function shareResult(text) {
+  if (navigator.share) {
+    try {
+      await navigator.share({ text });
+      return;
+    } catch (e) {
+      // User cancelled or share failed — fall through to clipboard
+      if (e.name === "AbortError") return;
+    }
+  }
+  // Fallback: copy to clipboard
+  try {
+    await navigator.clipboard.writeText(text);
+    showShareToast("Copied to clipboard!");
+  } catch (e) {
+    showShareToast("Couldn't copy — try manually");
+  }
+}
+
+function showShareToast(message) {
+  // Remove existing toast if any
+  const existing = document.querySelector(".share-toast");
+  if (existing) existing.remove();
+
+  const toast = document.createElement("div");
+  toast.className = "share-toast";
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.classList.add("visible"), 10);
+  setTimeout(() => {
+    toast.classList.remove("visible");
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
 }
 
 // ===================================
@@ -710,6 +751,12 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#btn-start-over").addEventListener("click", startOver);
   $("#btn-try-again").addEventListener("click", tryAnother);
   $("#btn-no-match-restart").addEventListener("click", startOver);
+  $("#btn-share").addEventListener("click", () => {
+    const title = $("#result-title").textContent;
+    const author = $("#result-author").textContent;
+    const text = `Check out "${title}" ${author} — found on BookBrew!\n\nhttps://bookbrew.org`;
+    shareResult(text);
+  });
 
   // Back buttons — all use dynamic goBack
   $("#back-type").addEventListener("click", () => goToStep("welcome"));

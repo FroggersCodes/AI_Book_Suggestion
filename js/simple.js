@@ -257,6 +257,14 @@ function simpleDisplayResult(localBook, apiData) {
   $("#simple-result-amazon-link").href = isbn10
     ? `https://www.amazon.com/dp/${isbn10}`
     : `https://www.amazon.com/s?k=${encodeURIComponent(localBook.title + " " + localBook.author)}`;
+
+  // Google Books link
+  if (apiData?.id) {
+    $("#simple-result-google-link").href = `https://books.google.com/books?id=${apiData.id}`;
+    $("#simple-result-google-link").style.display = "";
+  } else {
+    $("#simple-result-google-link").href = `https://books.google.com/books?q=${encodeURIComponent(localBook.title + " " + localBook.author)}`;
+  }
 }
 
 // ===================================
@@ -286,6 +294,12 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#btn-simple-start-over").addEventListener("click", simpleStartOver);
   $("#btn-simple-try-again").addEventListener("click", () => simpleFindAndShowBook());
   $("#btn-simple-no-match-restart").addEventListener("click", simpleStartOver);
+  $("#btn-simple-share").addEventListener("click", () => {
+    const title = $("#simple-result-title").textContent;
+    const author = $("#simple-result-author").textContent;
+    const text = `Check out "${title}" ${author} — found on BookBrew!\n\nhttps://bookbrew.org`;
+    shareResult(text);
+  });
 
   // Back buttons
   $("#back-simple-genre").addEventListener("click", () => simpleGoToStep("simple-welcome"));

@@ -496,8 +496,17 @@ h2 {
   margin-bottom: 32px;
 }
 
-.btn-amazon {
+.result-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-amazon,
+.btn-google {
   display: inline-flex;
+  font-size: 0.875rem;
+  padding: 12px 24px;
 }
 
 .result-actions {
@@ -614,6 +623,32 @@ h2 {
 }
 
 /* ===================================
+   Share Toast
+   =================================== */
+.share-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  z-index: 300;
+  opacity: 0;
+  transition: opacity 300ms ease, transform 300ms ease;
+  pointer-events: none;
+}
+
+.share-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===================================
    Static Pages (Track, Contact)
    =================================== */
 .static-page {
@@ -667,6 +702,10 @@ h2 {
 
   .result-details {
     text-align: center;
+  }
+
+  .result-links {
+    justify-content: center;
   }
 
   .options-grid-length {
