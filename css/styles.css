@@ -227,7 +227,7 @@ body {
   text-align: center;
 }
 
-h1 {
+h1, .page-heading {
   font-family: var(--font-serif);
   font-size: clamp(2rem, 5vw, 2.75rem);
   font-weight: 500;
@@ -681,7 +681,7 @@ h2 {
    Responsive
    =================================== */
 @media (max-width: 768px) {
-  h1 {
+  h1, .page-heading {
     font-size: 2rem;
   }
 
@@ -745,7 +745,7 @@ h2 {
     padding: calc(var(--header-h) + 16px) 16px 16px;
   }
 
-  h1 {
+  h1, .page-heading {
     font-size: 1.75rem;
   }
 

@@ -617,7 +617,7 @@ async function findAndShowBook() {
   } else {
     coverImg.src = "img/placeholder.svg";
   }
-  coverImg.alt = `Cover of ${book.title}`;
+  coverImg.alt = `Cover of ${book.title} by ${book.author}`;
   coverImg.onerror = () => { coverImg.src = "img/placeholder.svg"; };
 
   // Populate details

@@ -208,7 +208,7 @@ async function simpleBookLookup(book) {
 function simpleDisplayResult(localBook, apiData) {
   const coverImg = $("#simple-result-cover-img");
   coverImg.src = apiData?.thumbnail || "img/placeholder.svg";
-  coverImg.alt = `Cover of ${localBook.title}`;
+  coverImg.alt = `Cover of ${localBook.title} by ${localBook.author}`;
   coverImg.onerror = () => { coverImg.src = "img/placeholder.svg"; };
 
   $("#simple-result-title").textContent = localBook.title;
