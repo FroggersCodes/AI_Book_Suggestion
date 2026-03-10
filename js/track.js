@@ -143,9 +143,11 @@ function renderCurrentlyReading() {
   if (!data.currentlyReading) {
     container.innerHTML = `
       <div class="track-empty-state">
-        <p>No book in progress. Get a recommendation and tap "I'm Reading This".</p>
+        <p>No book in progress.</p>
+        <button class="btn-primary track-empty-cta" id="track-find-current-btn">Find a Book</button>
       </div>
     `;
+    document.getElementById("track-find-current-btn").addEventListener("click", openBookSearch);
     return;
   }
 
@@ -280,68 +282,137 @@ function removeFromLog(index) {
 }
 
 // ===================================
-// Manual Add Modal
+// Book Search Modal
 // ===================================
-function openAddManual() {
-  let modal = document.getElementById("track-manual-modal");
+let trackSearchResults = [];
+let searchDebounceTimer = null;
+
+function openBookSearch() {
+  let modal = document.getElementById("track-search-modal");
   if (!modal) {
     modal = document.createElement("div");
-    modal.id = "track-manual-modal";
+    modal.id = "track-search-modal";
     modal.className = "track-modal-overlay";
     modal.innerHTML = `
       <div class="track-modal">
-        <h3 class="track-modal-title">Add a Book</h3>
-        <form id="track-manual-form">
-          <label class="track-form-label" for="manual-title">Title</label>
-          <input type="text" id="manual-title" class="track-form-input" placeholder="Book title" required>
-          <label class="track-form-label" for="manual-author">Author</label>
-          <input type="text" id="manual-author" class="track-form-input" placeholder="Author name" required>
-          <div class="track-modal-actions">
-            <button type="submit" class="btn-primary">Add to Log</button>
-            <button type="button" class="btn-secondary" id="track-modal-cancel">Cancel</button>
-          </div>
-        </form>
+        <div class="track-modal-header">
+          <h3 class="track-modal-title">Find a Book</h3>
+          <button class="track-modal-close" id="track-search-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="track-search-wrap">
+          <input type="text" id="track-search-input" class="track-search-input"
+            placeholder="Search by title, author, or ISBN&hellip;" autocomplete="off">
+        </div>
+        <div id="track-search-results" class="track-search-results">
+          <p class="track-search-placeholder">Start typing to find books&hellip;</p>
+        </div>
       </div>
     `;
     document.body.appendChild(modal);
     modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeAddManual();
+      if (e.target === modal) closeBookSearch();
     });
   }
+
   modal.classList.add("visible");
-  document.getElementById("manual-title").value = "";
-  document.getElementById("manual-author").value = "";
-  document.getElementById("track-manual-form").onsubmit = submitManualBook;
-  document.getElementById("track-modal-cancel").onclick = closeAddManual;
-  document.getElementById("manual-title").focus();
+  const input = document.getElementById("track-search-input");
+  input.value = "";
+  document.getElementById("track-search-results").innerHTML =
+    '<p class="track-search-placeholder">Start typing to find books&hellip;</p>';
+  document.getElementById("track-search-close").onclick = closeBookSearch;
+  input.oninput = onSearchInput;
+  input.focus();
 }
 
-function closeAddManual() {
-  const modal = document.getElementById("track-manual-modal");
+function closeBookSearch() {
+  const modal = document.getElementById("track-search-modal");
   if (modal) modal.classList.remove("visible");
+  clearTimeout(searchDebounceTimer);
 }
 
-function submitManualBook(e) {
-  e.preventDefault();
-  const title = document.getElementById("manual-title").value.trim();
-  const author = document.getElementById("manual-author").value.trim();
-  if (!title || !author) return;
-  const data = loadTrackData();
-  const dup = data.readLog.find(
-    (b) =>
-      b.title.toLowerCase() === title.toLowerCase() &&
-      b.author.toLowerCase() === author.toLowerCase()
-  );
-  if (dup) {
-    showShareToast("Already in your reading log!");
-    closeAddManual();
+function onSearchInput(e) {
+  const query = e.target.value.trim();
+  const resultsEl = document.getElementById("track-search-results");
+  clearTimeout(searchDebounceTimer);
+
+  if (query.length < 2) {
+    resultsEl.innerHTML = '<p class="track-search-placeholder">Start typing to find books&hellip;</p>';
     return;
   }
-  data.readLog.unshift({ title, author, coverUrl: "", finishedDate: todayStr(), rating: 0 });
-  saveTrackData(data);
-  closeAddManual();
-  renderReadLog();
-  renderGoalCard();
+
+  resultsEl.innerHTML = '<p class="track-search-loading">Searching&hellip;</p>';
+
+  searchDebounceTimer = setTimeout(() => searchBooks(query), 350);
+}
+
+async function searchBooks(query) {
+  const resultsEl = document.getElementById("track-search-results");
+  if (!resultsEl) return;
+  try {
+    const url = `${CONFIG.GOOGLE_BOOKS_API_URL}?q=${encodeURIComponent(query)}&maxResults=10&key=${CONFIG.GOOGLE_BOOKS_API_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (!data.items || data.items.length === 0) {
+      resultsEl.innerHTML = '<p class="track-search-empty">No books found. Try a different search.</p>';
+      return;
+    }
+
+    trackSearchResults = data.items.map((item) => {
+      const info = item.volumeInfo || {};
+      const links = info.imageLinks || {};
+      return {
+        title: info.title || "Unknown Title",
+        author: (info.authors || []).join(", ") || "Unknown Author",
+        coverUrl: (links.thumbnail || links.smallThumbnail || "").replace("http:", "https:")
+      };
+    });
+
+    renderSearchResults();
+  } catch (e) {
+    resultsEl.innerHTML = '<p class="track-search-empty">Search failed. Please try again.</p>';
+  }
+}
+
+function renderSearchResults() {
+  const resultsEl = document.getElementById("track-search-results");
+  if (!resultsEl) return;
+
+  resultsEl.innerHTML = trackSearchResults.map((book, i) => {
+    const coverHtml = book.coverUrl
+      ? `<img class="track-search-cover" src="${escapeHtml(book.coverUrl)}" alt="">`
+      : `<div class="track-search-cover-ph"></div>`;
+    return `
+      <div class="track-search-result">
+        ${coverHtml}
+        <div class="track-search-info">
+          <p class="track-search-title">${escapeHtml(book.title)}</p>
+          <p class="track-search-author">${escapeHtml(book.author)}</p>
+        </div>
+        <div class="track-search-actions">
+          <button class="btn-search-reading" data-index="${i}">Reading Now</button>
+          <button class="btn-search-log" data-index="${i}">Add to Log</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  resultsEl.querySelectorAll(".btn-search-reading").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setCurrentlyReading(trackSearchResults[parseInt(btn.dataset.index)]);
+      closeBookSearch();
+      renderCurrentlyReading();
+    });
+  });
+
+  resultsEl.querySelectorAll(".btn-search-log").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      addToReadLog(trackSearchResults[parseInt(btn.dataset.index)]);
+      closeBookSearch();
+      renderReadLog();
+      renderGoalCard();
+    });
+  });
 }
 
 // ===================================
@@ -369,5 +440,5 @@ function escapeHtml(str) {
 // ===================================
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("track-goal-edit-btn").addEventListener("click", openGoalEditor);
-  document.getElementById("track-add-manual-btn").addEventListener("click", openAddManual);
+  document.getElementById("track-add-manual-btn").addEventListener("click", openBookSearch);
 });
