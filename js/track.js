@@ -165,8 +165,8 @@ function renderCurrentlyReading() {
         <p class="track-book-started">Started ${formatDate(book.startDate)}</p>
         <div class="track-current-actions">
           <button class="btn-track-finish" id="btn-finish-current">Mark as Finished</button>
-          <button class="btn-track-remove" id="btn-clear-current">Remove</button>
         </div>
+        <button class="btn-track-remove-sm" id="btn-clear-current">Remove</button>
       </div>
     </div>
   `;
