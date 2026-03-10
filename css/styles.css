@@ -781,3 +781,492 @@ h2 {
     padding: calc(var(--header-h) + 16px) 16px 16px;
   }
 }
+
+/* ===================================
+   Track Page
+   =================================== */
+.track-container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: calc(var(--header-h) + 48px) 24px 60px;
+}
+
+.track-goal-section,
+.track-section {
+  margin-bottom: 40px;
+}
+
+.track-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.track-section-title {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Goal Card */
+.track-goal-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+}
+
+.track-goal-numbers {
+  margin-bottom: 14px;
+}
+
+.track-goal-done,
+.track-goal-target {
+  font-size: 2.25rem;
+  font-weight: 600;
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+.track-goal-sep {
+  font-size: 1.5rem;
+  color: var(--text-muted);
+}
+
+.track-goal-label {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+.track-progress-wrap {
+  background: var(--progress-bg);
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.track-progress-fill {
+  background: var(--progress-active);
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.track-goal-pct {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* Goal Editor */
+.track-goal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.track-goal-form-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.track-goal-form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.track-goal-input {
+  width: 88px;
+  padding: 8px 12px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.track-goal-input:focus {
+  outline: none;
+  border-color: var(--text);
+}
+
+.btn-track-save {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.btn-track-save:hover {
+  background: var(--btn-hover);
+}
+
+.btn-track-cancel {
+  background: none;
+  color: var(--text-muted);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.btn-track-cancel:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+/* Edit / Add buttons */
+.track-edit-btn,
+.track-add-btn {
+  background: none;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+  white-space: nowrap;
+}
+
+.track-edit-btn:hover,
+.track-add-btn:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+/* Empty State */
+.track-empty-state {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 32px 24px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* Currently Reading Card */
+.track-current-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.track-book-cover {
+  width: 80px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.track-book-cover-placeholder {
+  width: 80px;
+  height: 120px;
+  background: var(--progress-bg);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.track-current-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.track-book-title {
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.track-book-author {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.track-book-started {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.track-current-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-track-finish {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.btn-track-finish:hover {
+  background: var(--btn-hover);
+}
+
+.btn-track-remove {
+  background: none;
+  color: var(--text-muted);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.btn-track-remove:hover {
+  color: #c0392b;
+  border-color: #c0392b;
+}
+
+/* Reading Log Grid */
+.track-log-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.track-log-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.track-log-cover {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.track-log-cover-placeholder {
+  width: 100%;
+  height: 140px;
+  background: var(--progress-bg);
+  border-radius: 4px;
+}
+
+.track-log-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.track-log-info .track-book-title {
+  font-size: 0.875rem;
+}
+
+.track-log-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Star Rating */
+.track-star-row {
+  display: flex;
+  gap: 1px;
+}
+
+.track-star {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--progress-bg);
+  padding: 0;
+  line-height: 1;
+  transition: color var(--transition);
+}
+
+.track-star.filled {
+  color: #c9a227;
+}
+
+.track-star:hover {
+  color: #c9a227;
+}
+
+.btn-track-remove-sm {
+  background: none;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-align: left;
+  transition: color var(--transition);
+}
+
+.btn-track-remove-sm:hover {
+  color: #c0392b;
+}
+
+/* Track buttons on result cards */
+.track-book-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--card-border);
+  flex-wrap: wrap;
+}
+
+.track-book-actions:empty {
+  display: none;
+}
+
+.track-label {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-right: 2px;
+}
+
+.btn-track {
+  background: none;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
+}
+
+.btn-track:hover {
+  color: var(--text);
+  border-color: var(--text);
+  background: rgba(35, 30, 24, 0.04);
+}
+
+/* Manual Add Modal */
+.track-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+
+.track-modal-overlay.visible {
+  display: flex;
+}
+
+.track-modal {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  width: min(480px, 90vw);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+}
+
+.track-modal-title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+.track-form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  margin-top: 14px;
+}
+
+.track-form-label:first-of-type {
+  margin-top: 0;
+}
+
+.track-form-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.track-form-input:focus {
+  outline: none;
+  border-color: var(--text);
+}
+
+.track-modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+@media (max-width: 480px) {
+  .track-container {
+    padding: calc(var(--header-h) + 24px) 16px 40px;
+  }
+
+  .track-log-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .track-current-card {
+    flex-direction: column;
+  }
+
+  .track-book-cover {
+    width: 70px;
+    height: 105px;
+  }
+}

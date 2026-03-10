@@ -265,6 +265,25 @@ function simpleDisplayResult(localBook, apiData) {
   } else {
     $("#simple-result-google-link").href = `https://books.google.com/books?q=${encodeURIComponent(localBook.title + " " + localBook.author)}`;
   }
+
+  // Track buttons
+  const trackBook = { title: localBook.title, author: localBook.author, coverUrl: apiData?.thumbnail || "" };
+  const trackEl = $("#simple-track-actions");
+  trackEl.innerHTML = "";
+  const label = document.createElement("span");
+  label.className = "track-label";
+  label.textContent = "Add to shelf:";
+  const readingBtn = document.createElement("button");
+  readingBtn.className = "btn-track";
+  readingBtn.textContent = "I'm Reading This";
+  readingBtn.addEventListener("click", () => setCurrentlyReading(trackBook));
+  const doneBtn = document.createElement("button");
+  doneBtn.className = "btn-track";
+  doneBtn.textContent = "Mark as Read";
+  doneBtn.addEventListener("click", () => addToReadLog(trackBook));
+  trackEl.appendChild(label);
+  trackEl.appendChild(readingBtn);
+  trackEl.appendChild(doneBtn);
 }
 
 // ===================================
