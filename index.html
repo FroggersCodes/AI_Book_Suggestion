@@ -68,8 +68,8 @@
     <div class="nav-inner">
       <div id="site-logo">BookBrew</div>
       <nav class="nav-tabs">
-        <button class="nav-tab active" data-tab="simple">Simple</button>
-        <button class="nav-tab" data-tab="advanced">Advanced</button>
+        <button class="nav-tab active" data-tab="simple">Curated</button>
+        <button class="nav-tab" data-tab="advanced">Deep Dive</button>
         <button class="nav-tab" data-tab="track">Track</button>
         <button class="nav-tab" data-tab="contact">Contact Us</button>
       </nav>
@@ -160,6 +160,7 @@
               </div>
             </div>
           </div>
+          <div class="track-book-actions" id="simple-track-actions"></div>
           <div class="result-actions">
             <button class="btn-secondary" id="btn-simple-share">Share</button>
             <button class="btn-secondary" id="btn-simple-try-again">Try Another</button>
@@ -285,6 +286,7 @@
               </div>
             </div>
           </div>
+          <div class="track-book-actions" id="advanced-track-actions"></div>
           <div class="result-actions">
             <button class="btn-secondary" id="btn-share">Share</button>
             <button class="btn-secondary" id="btn-try-again">Try Another</button>
@@ -314,9 +316,34 @@
          TRACK PAGE
          ============================ -->
     <div id="page-track" class="page-container">
-      <div class="static-page">
-        <h2 class="page-heading">Coming Soon</h2>
-        <p class="tagline">Track your reading journey — set goals, log books, and watch your library grow.</p>
+      <div class="track-container">
+
+        <!-- Goal Section -->
+        <div class="track-goal-section">
+          <div class="track-section-header">
+            <h2 class="track-section-title">Reading Goal</h2>
+            <button class="track-edit-btn" id="track-goal-edit-btn">Edit</button>
+          </div>
+          <div class="track-goal-card" id="track-goal-card"></div>
+        </div>
+
+        <!-- Currently Reading Section -->
+        <div class="track-section">
+          <div class="track-section-header">
+            <h2 class="track-section-title">Currently Reading</h2>
+          </div>
+          <div id="track-currently-reading"></div>
+        </div>
+
+        <!-- Reading Log Section -->
+        <div class="track-section">
+          <div class="track-section-header">
+            <h2 class="track-section-title">Reading Log</h2>
+            <button class="track-add-btn" id="track-add-manual-btn">+ Add Book</button>
+          </div>
+          <div id="track-log-list"></div>
+        </div>
+
       </div>
     </div>
 
@@ -338,6 +365,7 @@
   <script src="js/books.js"></script>
   <script src="js/app.js"></script>
   <script src="js/simple.js"></script>
+  <script src="js/track.js"></script>
   <script src="js/nav.js"></script>
 
 </body>

@@ -662,6 +662,25 @@ async function findAndShowBook() {
   // Google Books link
   $("#result-google-link").href = `https://books.google.com/books?id=${book.id}`;
 
+  // Track buttons
+  const trackBook = { title: book.title, author: book.author, coverUrl: book.thumbnail || "" };
+  const trackEl = $("#advanced-track-actions");
+  trackEl.innerHTML = "";
+  const label = document.createElement("span");
+  label.className = "track-label";
+  label.textContent = "Add to shelf:";
+  const readingBtn = document.createElement("button");
+  readingBtn.className = "btn-track";
+  readingBtn.textContent = "I'm Reading This";
+  readingBtn.addEventListener("click", () => setCurrentlyReading(trackBook));
+  const doneBtn = document.createElement("button");
+  doneBtn.className = "btn-track";
+  doneBtn.textContent = "Mark as Read";
+  doneBtn.addEventListener("click", () => addToReadLog(trackBook));
+  trackEl.appendChild(label);
+  trackEl.appendChild(readingBtn);
+  trackEl.appendChild(doneBtn);
+
   // Show result
   $("#loading-overlay").classList.add("hidden");
   goToStep("result");

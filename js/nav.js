@@ -31,6 +31,11 @@ function switchTab(tabId) {
 
   // Scroll to top
   window.scrollTo(0, 0);
+
+  // Re-render Track page whenever it's opened
+  if (tabId === "track" && typeof renderTrackPage === "function") {
+    renderTrackPage();
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
