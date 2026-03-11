@@ -153,20 +153,20 @@ function renderCurrentlyReading() {
 
   const book = data.currentlyReading;
   const coverHtml = book.coverUrl
-    ? `<img class="track-book-cover" src="${escapeHtml(book.coverUrl)}" alt="Cover">`
-    : `<div class="track-book-cover-placeholder"></div>`;
+    ? `<img class="track-log-cover" src="${escapeHtml(book.coverUrl)}" alt="Cover">`
+    : `<div class="track-log-cover-placeholder"></div>`;
 
   container.innerHTML = `
-    <div class="track-current-card">
-      ${coverHtml}
-      <div class="track-current-info">
-        <p class="track-book-title">${escapeHtml(book.title)}</p>
-        <p class="track-book-author">by ${escapeHtml(book.author)}</p>
-        <p class="track-book-started">Started ${formatDate(book.startDate)}</p>
-        <div class="track-current-actions">
+    <div class="track-log-grid">
+      <div class="track-log-card">
+        ${coverHtml}
+        <div class="track-log-info">
+          <p class="track-book-title">${escapeHtml(book.title)}</p>
+          <p class="track-book-author">by ${escapeHtml(book.author)}</p>
+          <p class="track-log-date">Started ${formatDate(book.startDate)}</p>
           <button class="btn-track-finish" id="btn-finish-current">Mark as Finished</button>
+          <button class="btn-track-remove-sm" id="btn-clear-current">Remove</button>
         </div>
-        <button class="btn-track-remove-sm" id="btn-clear-current">Remove</button>
       </div>
     </div>
   `;

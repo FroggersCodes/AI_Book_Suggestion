@@ -964,39 +964,6 @@ h2 {
   line-height: 1.5;
 }
 
-/* Currently Reading Card */
-.track-current-card {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius);
-  padding: 20px;
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-.track-book-cover {
-  width: 80px;
-  height: 120px;
-  object-fit: cover;
-  object-position: top;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-
-.track-book-cover-placeholder {
-  width: 80px;
-  height: 120px;
-  background: var(--progress-bg);
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-
-.track-current-info {
-  flex: 1;
-  min-width: 0;
-}
-
 .track-book-title {
   font-family: var(--font-serif);
   font-size: 1.125rem;
@@ -1011,13 +978,7 @@ h2 {
   margin-bottom: 4px;
 }
 
-.track-book-started {
-  font-size: 0.8125rem;
-  color: var(--text-muted);
-  margin-bottom: 16px;
-}
 
-.track-current-actions {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
@@ -1490,14 +1451,5 @@ h2 {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .track-current-card {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .track-book-cover {
-    width: 70px;
-    height: 105px;
-  }
 }
+
