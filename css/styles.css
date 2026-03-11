@@ -978,12 +978,6 @@ h2 {
   margin-bottom: 4px;
 }
 
-
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
 .btn-track-finish {
   background: var(--btn-bg);
   color: var(--btn-text);
@@ -991,11 +985,11 @@ h2 {
   border-radius: var(--radius);
   font-family: var(--font-sans);
   font-size: 0.8125rem;
-  font-weight: 500;
-  padding: 7px 16px;
+  font-weight: 600;
+  padding: 8px 16px;
   cursor: pointer;
   transition: background var(--transition);
-  width: fit-content;
+  width: 100%;
 }
 
 .btn-track-finish:hover {
@@ -1018,6 +1012,21 @@ h2 {
 .btn-track-remove:hover {
   background: var(--btn-bg);
   color: var(--btn-text);
+}
+
+/* Currently Reading — horizontal scroll row */
+.track-current-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--card-border) transparent;
+}
+
+.track-current-scroll .track-log-card {
+  width: 160px;
+  flex-shrink: 0;
 }
 
 /* Reading Log Grid */

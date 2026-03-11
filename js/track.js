@@ -14,7 +14,11 @@ function loadTrackData() {
     const data = JSON.parse(raw);
     if (!data.goals) data.goals = { yearlyTarget: 24 };
     if (!data.readLog) data.readLog = [];
-    if (!("currentlyReading" in data)) data.currentlyReading = null;
+    if (!("currentlyReading" in data)) data.currentlyReading = [];
+    // migrate legacy single-book format
+    if (data.currentlyReading && !Array.isArray(data.currentlyReading)) {
+      data.currentlyReading = [data.currentlyReading];
+    }
     return data;
   } catch (e) {
     return defaultTrackData();
@@ -22,7 +26,7 @@ function loadTrackData() {
 }
 
 function defaultTrackData() {
-  return { goals: { yearlyTarget: 24 }, currentlyReading: null, readLog: [] };
+  return { goals: { yearlyTarget: 24 }, currentlyReading: [], readLog: [] };
 }
 
 function saveTrackData(data) {
@@ -34,12 +38,18 @@ function saveTrackData(data) {
 // ===================================
 function setCurrentlyReading(book) {
   const data = loadTrackData();
-  data.currentlyReading = {
-    title: book.title,
-    author: book.author,
-    coverUrl: book.coverUrl || "",
-    startDate: todayStr()
-  };
+  const already = data.currentlyReading.some(
+    (b) => b.title.toLowerCase() === book.title.toLowerCase() &&
+            b.author.toLowerCase() === book.author.toLowerCase()
+  );
+  if (!already) {
+    data.currentlyReading.push({
+      title: book.title,
+      author: book.author,
+      coverUrl: book.coverUrl || "",
+      startDate: todayStr()
+    });
+  }
   saveTrackData(data);
   showShareToast("Saved to Currently Reading!");
 }
@@ -140,7 +150,7 @@ function renderCurrentlyReading() {
   if (!container) return;
   const data = loadTrackData();
 
-  if (!data.currentlyReading) {
+  if (!data.currentlyReading.length) {
     container.innerHTML = `
       <div class="track-empty-state">
         <p>No book in progress.</p>
@@ -151,34 +161,38 @@ function renderCurrentlyReading() {
     return;
   }
 
-  const book = data.currentlyReading;
-  const coverHtml = book.coverUrl
-    ? `<img class="track-log-cover" src="${escapeHtml(book.coverUrl)}" alt="Cover">`
-    : `<div class="track-log-cover-placeholder"></div>`;
-
-  container.innerHTML = `
-    <div class="track-log-grid">
+  const cards = data.currentlyReading.map((book, i) => {
+    const coverHtml = book.coverUrl
+      ? `<img class="track-log-cover" src="${escapeHtml(book.coverUrl)}" alt="Cover">`
+      : `<div class="track-log-cover-placeholder"></div>`;
+    return `
       <div class="track-log-card">
         ${coverHtml}
         <div class="track-log-info">
           <p class="track-book-title">${escapeHtml(book.title)}</p>
           <p class="track-book-author">by ${escapeHtml(book.author)}</p>
           <p class="track-log-date">Started ${formatDate(book.startDate)}</p>
-          <button class="btn-track-finish" id="btn-finish-current">Mark as Finished</button>
-          <button class="btn-track-remove-sm" id="btn-clear-current">Remove</button>
+          <button class="btn-track-finish" data-index="${i}">Mark as Finished</button>
+          <button class="btn-track-remove-sm" data-remove="${i}">Remove</button>
         </div>
       </div>
-    </div>
-  `;
+    `;
+  }).join("");
 
-  document.getElementById("btn-finish-current").addEventListener("click", finishCurrentBook);
-  document.getElementById("btn-clear-current").addEventListener("click", clearCurrentlyReading);
+  container.innerHTML = `<div class="track-current-scroll">${cards}</div>`;
+
+  container.querySelectorAll(".btn-track-finish").forEach((btn) => {
+    btn.addEventListener("click", () => finishCurrentBook(parseInt(btn.dataset.index)));
+  });
+  container.querySelectorAll("[data-remove]").forEach((btn) => {
+    btn.addEventListener("click", () => clearCurrentlyReading(parseInt(btn.dataset.remove)));
+  });
 }
 
-function finishCurrentBook() {
+function finishCurrentBook(index) {
   const data = loadTrackData();
-  if (!data.currentlyReading) return;
-  const book = data.currentlyReading;
+  const book = data.currentlyReading[index];
+  if (!book) return;
   const dup = data.readLog.find(
     (b) =>
       b.title.toLowerCase() === book.title.toLowerCase() &&
@@ -193,14 +207,14 @@ function finishCurrentBook() {
       rating: 0
     });
   }
-  data.currentlyReading = null;
+  data.currentlyReading.splice(index, 1);
   saveTrackData(data);
   renderTrackPage();
 }
 
-function clearCurrentlyReading() {
+function clearCurrentlyReading(index) {
   const data = loadTrackData();
-  data.currentlyReading = null;
+  data.currentlyReading.splice(index, 1);
   saveTrackData(data);
   renderCurrentlyReading();
 }
