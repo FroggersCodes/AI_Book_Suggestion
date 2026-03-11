@@ -422,10 +422,10 @@ function showBookDetail(book) {
   if (!modal) return;
 
   const stars = book.averageRating
-    ? renderTrackStars(book.averageRating)
+    ? renderStars(book.averageRating)
     : "";
   const ratingHtml = book.averageRating
-    ? `<div class="track-detail-rating">${stars} <span class="track-detail-rating-val">${book.averageRating.toFixed(1)}</span></div>`
+    ? `<p class="result-rating"><span class="result-stars">${stars}</span> <span class="rating-value">${book.averageRating.toFixed(1)}</span></p>`
     : "";
   const maturityHtml = `<span class="track-detail-maturity ${book.isMature ? "mature" : "not-mature"}">${book.isMature ? "Mature" : "Not Mature"}</span>`;
   const coverHtml = book.coverUrl
@@ -459,8 +459,8 @@ function showBookDetail(book) {
         </div>
         <p class="track-detail-desc">${escapeHtml(desc)}</p>
         <div class="track-detail-links">
-          <a class="btn-detail-link btn-amazon" href="${amazonUrl}" target="_blank" rel="noopener noreferrer">Buy on Amazon</a>
-          <a class="btn-detail-link btn-google" href="${googleUrl}" target="_blank" rel="noopener noreferrer">Google Books</a>
+          <a class="btn-primary btn-amazon" href="${amazonUrl}" target="_blank" rel="noopener noreferrer">Buy on Amazon</a>
+          <a class="btn-primary btn-google" href="${googleUrl}" target="_blank" rel="noopener noreferrer">Google Books</a>
         </div>
         <div class="track-detail-actions">
           <button class="btn-search-reading" id="track-detail-reading">I'm Reading This</button>
@@ -488,15 +488,6 @@ function showBookDetail(book) {
   });
 }
 
-function renderTrackStars(rating) {
-  let html = "";
-  for (let i = 1; i <= 5; i++) {
-    if (rating >= i) html += `<span class="track-star filled">★</span>`;
-    else if (rating >= i - 0.5) html += `<span class="track-star filled">½</span>`;
-    else html += `<span class="track-star">☆</span>`;
-  }
-  return html;
-}
 
 function reopenBookSearchModal() {
   const modal = document.getElementById("track-search-modal");
