@@ -989,7 +989,6 @@ h2 {
   padding: 8px 16px;
   cursor: pointer;
   transition: background var(--transition);
-  width: 100%;
 }
 
 .btn-track-finish:hover {
