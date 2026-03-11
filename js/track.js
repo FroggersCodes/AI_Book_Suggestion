@@ -315,8 +315,15 @@ function openBookSearch() {
   }
 
   modal.classList.add("visible");
+  // If modal was replaced by a detail view, rebuild it
+  if (!document.getElementById("track-search-input")) {
+    reopenBookSearchModal();
+    document.getElementById("track-search-input").value = "";
+    return;
+  }
   const input = document.getElementById("track-search-input");
   input.value = "";
+  trackSearchResults = [];
   document.getElementById("track-search-results").innerHTML =
     '<p class="track-search-placeholder">Start typing to find books&hellip;</p>';
   document.getElementById("track-search-close").onclick = closeBookSearch;
@@ -361,10 +368,19 @@ async function searchBooks(query) {
     trackSearchResults = data.items.map((item) => {
       const info = item.volumeInfo || {};
       const links = info.imageLinks || {};
+      const ids = info.industryIdentifiers || [];
+      const isbn10 = (ids.find((x) => x.type === "ISBN_10") || {}).identifier || "";
+      const desc = (info.description || "").replace(/<[^>]*>/g, "");
       return {
+        id: item.id || "",
         title: info.title || "Unknown Title",
         author: (info.authors || []).join(", ") || "Unknown Author",
-        coverUrl: (links.thumbnail || links.smallThumbnail || "").replace("http:", "https:")
+        coverUrl: (links.thumbnail || links.smallThumbnail || "").replace("http:", "https:"),
+        description: desc,
+        averageRating: info.averageRating || 0,
+        ratingsCount: info.ratingsCount || 0,
+        isbn10,
+        isMature: info.maturityRating === "MATURE"
       };
     });
 
@@ -383,36 +399,131 @@ function renderSearchResults() {
       ? `<img class="track-search-cover" src="${escapeHtml(book.coverUrl)}" alt="">`
       : `<div class="track-search-cover-ph"></div>`;
     return `
-      <div class="track-search-result">
+      <div class="track-search-result" data-index="${i}" style="cursor:pointer;">
         ${coverHtml}
         <div class="track-search-info">
           <p class="track-search-title">${escapeHtml(book.title)}</p>
           <p class="track-search-author">${escapeHtml(book.author)}</p>
         </div>
-        <div class="track-search-actions">
-          <button class="btn-search-reading" data-index="${i}">Reading Now</button>
-          <button class="btn-search-log" data-index="${i}">Add to Log</button>
-        </div>
+        <span class="track-search-chevron">›</span>
       </div>
     `;
   }).join("");
 
-  resultsEl.querySelectorAll(".btn-search-reading").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      setCurrentlyReading(trackSearchResults[parseInt(btn.dataset.index)]);
-      closeBookSearch();
-      renderCurrentlyReading();
+  resultsEl.querySelectorAll(".track-search-result").forEach((row) => {
+    row.addEventListener("click", () => {
+      showBookDetail(trackSearchResults[parseInt(row.dataset.index)]);
     });
   });
+}
 
-  resultsEl.querySelectorAll(".btn-search-log").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      addToReadLog(trackSearchResults[parseInt(btn.dataset.index)]);
-      closeBookSearch();
-      renderReadLog();
-      renderGoalCard();
-    });
+function showBookDetail(book) {
+  const modal = document.getElementById("track-search-modal");
+  if (!modal) return;
+
+  const stars = book.averageRating
+    ? renderTrackStars(book.averageRating)
+    : "";
+  const ratingHtml = book.averageRating
+    ? `<div class="track-detail-rating">${stars} <span class="track-detail-rating-val">${book.averageRating.toFixed(1)}</span></div>`
+    : "";
+  const maturityHtml = `<span class="track-detail-maturity ${book.isMature ? "mature" : "not-mature"}">${book.isMature ? "Mature" : "Not Mature"}</span>`;
+  const coverHtml = book.coverUrl
+    ? `<img class="track-detail-cover" src="${escapeHtml(book.coverUrl)}" alt="">`
+    : `<div class="track-detail-cover-ph"></div>`;
+  const desc = book.description
+    ? (book.description.length > 400 ? book.description.slice(0, 400) + "…" : book.description)
+    : "No description available.";
+  const amazonUrl = book.isbn10
+    ? `https://www.amazon.com/dp/${book.isbn10}`
+    : `https://www.amazon.com/s?k=${encodeURIComponent(book.title + " " + book.author)}`;
+  const googleUrl = book.id
+    ? `https://books.google.com/books?id=${book.id}`
+    : `https://books.google.com/books?q=${encodeURIComponent(book.title + " " + book.author)}`;
+
+  modal.innerHTML = `
+    <div class="track-modal">
+      <div class="track-modal-header">
+        <button class="track-detail-back" id="track-detail-back">← Back</button>
+        <button class="track-modal-close" id="track-search-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="track-detail-body">
+        <div class="track-detail-top">
+          ${coverHtml}
+          <div class="track-detail-meta">
+            <p class="track-detail-title">${escapeHtml(book.title)}</p>
+            <p class="track-detail-author">by ${escapeHtml(book.author)}</p>
+            ${ratingHtml}
+            ${maturityHtml}
+          </div>
+        </div>
+        <p class="track-detail-desc">${escapeHtml(desc)}</p>
+        <div class="track-detail-links">
+          <a class="btn-detail-link btn-amazon" href="${amazonUrl}" target="_blank" rel="noopener noreferrer">Buy on Amazon</a>
+          <a class="btn-detail-link btn-google" href="${googleUrl}" target="_blank" rel="noopener noreferrer">Google Books</a>
+        </div>
+        <div class="track-detail-actions">
+          <button class="btn-search-reading" id="track-detail-reading">I'm Reading This</button>
+          <button class="btn-search-log" id="track-detail-log">Mark as Read</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  modal.querySelector("#track-detail-back").addEventListener("click", () => {
+    // Rebuild the original modal
+    reopenBookSearchModal();
   });
+  modal.querySelector("#track-search-close").addEventListener("click", closeBookSearch);
+  modal.querySelector("#track-detail-reading").addEventListener("click", () => {
+    setCurrentlyReading(book);
+    closeBookSearch();
+    renderCurrentlyReading();
+  });
+  modal.querySelector("#track-detail-log").addEventListener("click", () => {
+    addToReadLog(book);
+    closeBookSearch();
+    renderReadLog();
+    renderGoalCard();
+  });
+}
+
+function renderTrackStars(rating) {
+  let html = "";
+  for (let i = 1; i <= 5; i++) {
+    if (rating >= i) html += `<span class="track-star filled">★</span>`;
+    else if (rating >= i - 0.5) html += `<span class="track-star filled">½</span>`;
+    else html += `<span class="track-star">☆</span>`;
+  }
+  return html;
+}
+
+function reopenBookSearchModal() {
+  const modal = document.getElementById("track-search-modal");
+  if (!modal) return;
+  modal.innerHTML = `
+    <div class="track-modal">
+      <div class="track-modal-header">
+        <h3 class="track-modal-title">Find a Book</h3>
+        <button class="track-modal-close" id="track-search-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="track-search-wrap">
+        <input type="text" id="track-search-input" class="track-search-input"
+          placeholder="Search by title, author, or ISBN&hellip;" autocomplete="off">
+      </div>
+      <div id="track-search-results" class="track-search-results"></div>
+    </div>
+  `;
+  modal.querySelector("#track-search-close").onclick = closeBookSearch;
+  const input = modal.querySelector("#track-search-input");
+  input.oninput = onSearchInput;
+  input.focus();
+  if (trackSearchResults.length > 0) {
+    renderSearchResults();
+  } else {
+    document.getElementById("track-search-results").innerHTML =
+      '<p class="track-search-placeholder">Start typing to find books&hellip;</p>';
+  }
 }
 
 // ===================================
@@ -441,4 +552,5 @@ function escapeHtml(str) {
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("track-goal-edit-btn").addEventListener("click", openGoalEditor);
   document.getElementById("track-add-manual-btn").addEventListener("click", openBookSearch);
+  document.getElementById("track-add-current-btn").addEventListener("click", openBookSearch);
 });
