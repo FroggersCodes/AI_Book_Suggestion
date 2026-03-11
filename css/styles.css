@@ -1020,6 +1020,21 @@ h2 {
   color: var(--btn-text);
 }
 
+/* Currently Reading — horizontal scroll row */
+.track-current-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--card-border) transparent;
+}
+
+.track-current-scroll .track-log-card {
+  width: 160px;
+  flex-shrink: 0;
+}
+
 /* Reading Log Grid */
 .track-log-grid {
   display: grid;
