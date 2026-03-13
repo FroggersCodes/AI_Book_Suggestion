@@ -677,6 +677,64 @@ h2 {
   text-decoration-color: var(--text);
 }
 
+/* Email Signup */
+.signup-form {
+  margin-top: 24px;
+  width: 100%;
+  max-width: 440px;
+}
+
+.signup-row {
+  display: flex;
+  gap: 8px;
+}
+
+.signup-input {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  background: var(--card-bg);
+  color: var(--text);
+}
+
+.signup-input:focus {
+  outline: none;
+  border-color: var(--text);
+}
+
+.signup-input.error {
+  border-color: #c0392b;
+}
+
+.signup-btn {
+  white-space: nowrap;
+}
+
+.signup-msg {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  margin-top: 10px;
+  min-height: 1.2em;
+}
+
+.signup-msg.success {
+  color: #2E7D32;
+}
+
+.signup-msg.error {
+  color: #c0392b;
+}
+
+.signup-privacy {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 12px;
+}
+
 /* ===================================
    Responsive
    =================================== */
@@ -779,5 +837,13 @@ h2 {
 
   .static-page {
     padding: calc(var(--header-h) + 16px) 16px 16px;
+  }
+
+  .signup-row {
+    flex-direction: column;
+  }
+
+  .signup-btn {
+    width: 100%;
   }
 }
